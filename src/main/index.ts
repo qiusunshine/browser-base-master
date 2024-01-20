@@ -12,10 +12,10 @@ import { platform } from 'os';
 import { Application } from './application';
 import {getWebUIURL} from "~/common/webui-main";
 
-export const isNightly = app.name === 'Xiu-nightly';
+export const isNightly = app.name === '嗅觉-nightly';
 
 app.allowRendererProcessReuse = true;
-app.name = isNightly ? 'Xiu Nightly' : 'Xiu';
+app.name = isNightly ? '嗅觉 Nightly' : '嗅觉';
 
 (process.env as any)['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true;
 

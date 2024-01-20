@@ -13,6 +13,7 @@ import {ISettings} from '~/interfaces';
 import {resolve} from "path";
 import {readFileAsText} from "~/utils/files";
 import {ChromeUserAgent} from "~/main/user-agent";
+import IpcMainEvent = Electron.IpcMainEvent;
 
 export class Settings extends EventEmitter {
   public object = DEFAULT_SETTINGS;
@@ -20,6 +21,8 @@ export class Settings extends EventEmitter {
   private queue: string[] = [];
 
   private loaded = false;
+
+  public crxListenerMap = new Map<string, any[]>();
 
   public constructor() {
     super();
@@ -59,6 +62,75 @@ export class Settings extends EventEmitter {
     nativeTheme.on('updated', () => {
       this.update();
     });
+
+    // ipcMain.on('xiu-crx-add-listener', async (event: IpcMainEvent, extensionId, name, ...opts) => {
+    //   if (this.crxListenerMap.has(name)) {
+    //     this.crxListenerMap.get(name).push([extensionId, ...opts]);
+    //   } else {
+    //     this.crxListenerMap.set(name, [extensionId, ...opts]);
+    //   }
+    //   const contexts = [
+    //     Application.instance.sessions.view,
+    //     Application.instance.sessions.viewIncognito,
+    //   ];
+    //   contexts.forEach((e) => {
+    //     if (name == "xiu.onBeforeRequest") {
+    //       e.webRequest.onBeforeSendHeaders(opts[0], (details: Electron.OnBeforeSendHeadersListenerDetails, callback: any) => {
+    //         callback({});
+    //         if (this.crxListenerMap.has(name)) {
+    //           let arr = this.crxListenerMap.get(name);
+    //           arr = arr.filter(it => it[0] == extensionId);
+    //           if(arr.length == 0) {
+    //             return
+    //           }
+    //         }
+    //         event.sender.send("crx-" + name, details);
+    //       });
+    //     } else if (name == "xiu.onBeforeRedirect") {
+    //       e.webRequest.onBeforeRedirect(opts[0], (details: Electron.OnBeforeRedirectListenerDetails) => {
+    //         if (this.crxListenerMap.has(name)) {
+    //           let arr = this.crxListenerMap.get(name);
+    //           arr = arr.filter(it => it[0] == extensionId);
+    //           if(arr.length == 0) {
+    //             return
+    //           }
+    //         }
+    //         event.sender.send("crx-" + name, details);
+    //       });
+    //     } else if (name == "xiu.onBeforeSendHeaders") {
+    //       e.webRequest.onBeforeSendHeaders(opts[0], (details: Electron.OnBeforeSendHeadersListenerDetails, callback: any) => {
+    //         callback({});
+    //         if (this.crxListenerMap.has(name)) {
+    //           let arr = this.crxListenerMap.get(name);
+    //           arr = arr.filter(it => it[0] == extensionId);
+    //           if(arr.length == 0) {
+    //             return
+    //           }
+    //         }
+    //         event.sender.send("crx-" + name, details);
+    //       });
+    //     } else if (name == "xiu.onResponseStarted") {
+    //       e.webRequest.onResponseStarted(opts[0], (details: Electron.OnResponseStartedListenerDetails) => {
+    //         if (this.crxListenerMap.has(name)) {
+    //           let arr = this.crxListenerMap.get(name);
+    //           arr = arr.filter(it => it[0] == extensionId);
+    //           if(arr.length == 0) {
+    //             return
+    //           }
+    //         }
+    //         event.sender.send("crx-" + name, details);
+    //       });
+    //     }
+    //   });
+    // });
+    //
+    // ipcMain.on('xiu-crx-remove-listener', async (e, extensionId, name, ...opts) => {
+    //   if (this.crxListenerMap.has(name)) {
+    //     let arr = this.crxListenerMap.get(name);
+    //     arr = arr.filter(it => it[0] != extensionId);
+    //     this.crxListenerMap.set(name, arr);
+    //   }
+    // });
 
     this.load();
   }

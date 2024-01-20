@@ -1,6 +1,6 @@
 {
   "appId": "org.hiker.xiu",
-  "productName": "Xiu",
+  "productName": "嗅觉",
   "nsis": {
     "include": "static/installer.nsh",
     "installerLanguages": ["zh_CN"]

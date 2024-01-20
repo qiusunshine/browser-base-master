@@ -113,7 +113,7 @@ export class StartupTabsStore {
   }
 
   public async addStartupTabItem(item: IStartupTab) {
-    if(item.url && item.url.startsWith("chrome-ex")) {
+    if(!item.url || item.url.startsWith("chrome-ex") || item.url.endsWith(".crx") || item.url.endsWith(".zip")) {
       return;
     }
     const itemToReplace = this.list.find((x) => x.id === item.id);
@@ -138,7 +138,7 @@ export class StartupTabsStore {
   }
 
   public async updateStartupTabItem(tab: ITab) {
-    if(tab.url && tab.url.startsWith("chrome-ex")) {
+    if(!tab.url || tab.url.startsWith("chrome-ex") || tab.url.endsWith(".crx") || tab.url.endsWith(".zip")) {
       return;
     }
     this.addStartupTabItem({

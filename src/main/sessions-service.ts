@@ -437,6 +437,9 @@ export class SessionsService {
         window.send('download-progress', data);
 
         Object.assign(downloadItem, data);
+        if(webContents.getURL() == item.getURL()) {
+          webContents.goBack();
+        }
       });
       item.once('done', async (event, state) => {
         if (state === 'completed') {

@@ -18,11 +18,11 @@ __webpack_require__.r(__webpack_exports__);
 
 const formatIpcName = name => `crx-${name}`;
 const listenerMap = new Map();
-const addExtensionListener = (extensionId, name, callback) => {
+const addExtensionListener = (extensionId, name, callback, ...opts) => {
   const listenerCount = listenerMap.get(name) || 0;
   if (listenerCount === 0) {
     // TODO: should these IPCs be batched in a microtask?
-    electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.send('crx-add-listener', extensionId, name);
+    electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.send(name.startsWith("xiu.") ? "xiu-crx-add-listener" : 'crx-add-listener', extensionId, name, ...opts);
   }
   listenerMap.set(name, listenerCount + 1);
   electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.addListener(formatIpcName(name), function (event, ...args) {
@@ -37,7 +37,7 @@ const removeExtensionListener = (extensionId, name, callback) => {
     const listenerCount = listenerMap.get(name) || 0;
     if (listenerCount <= 1) {
       listenerMap.delete(name);
-      electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.send('crx-remove-listener', extensionId, name);
+      electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.send(name.startsWith("xiu.") ? "xiu-crx-remove-listener" : 'crx-remove-listener', extensionId, name);
     } else {
       listenerMap.set(name, listenerCount - 1);
     }
@@ -126,8 +126,8 @@ const injectExtensionAPIs = () => {
       constructor(name) {
         this.name = name;
       }
-      addListener(callback) {
-        electron.addExtensionListener(extensionId, this.name, callback);
+      addListener(callback, ...args) {
+        electron.addExtensionListener(extensionId, this.name, callback, ...args);
       }
       removeListener(callback) {
         electron.removeExtensionListener(extensionId, this.name, callback);
@@ -381,14 +381,18 @@ const injectExtensionAPIs = () => {
           };
         }
       },
-      // webRequest: {
-      //   factory: base => {
-      //     return {
-      //       ...base,
-      //       onHeadersReceived: new ExtensionEvent('webRequest.onHeadersReceived')
-      //     };
-      //   }
-      // },
+      webRequest: {
+        factory: base => {
+          return {
+            ...base,
+            onHeadersReceived: new ExtensionEvent('webRequest.onHeadersReceived'),
+            // onBeforeRedirect: new ExtensionEvent('xiu.onBeforeRedirect'),
+            // onBeforeRequest: new ExtensionEvent('xiu.onBeforeRequest'),
+            // onBeforeSendHeaders: new ExtensionEvent('xiu.onBeforeSendHeaders'),
+            // onResponseStarted: new ExtensionEvent('xiu.onResponseStarted')
+          };
+        }
+      },
       windows: {
         factory: base => {
           return {

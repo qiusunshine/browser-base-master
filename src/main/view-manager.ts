@@ -134,6 +134,12 @@ export class ViewManager extends EventEmitter {
       r.url.startsWith(`${WEBUI_BASE_URL}settings`),
     );
   }
+  
+  public findByKey (key: string): View {
+    return Object.values(this.views).find((r) =>
+      r.url.includes(`${key}`),
+    );
+  }
 
   public create(
     details: chrome.tabs.CreateProperties,

@@ -1,9 +1,10 @@
-import { ipcRenderer, webFrame } from 'electron';
+import {ipcRenderer, webFrame} from 'electron';
 
 import AutoComplete from './models/auto-complete';
-import { getTheme } from '~/utils/themes';
-import { ERROR_PROTOCOL, WEBUI_BASE_URL } from '~/constants/files';
-import { injectChromeWebstoreInstallButton } from './chrome-webstore';
+import {getTheme} from '~/utils/themes';
+import {ERROR_PROTOCOL, WEBUI_BASE_URL} from '~/constants/files';
+import {injectChromeWebstoreInstallButton} from './chrome-webstore';
+import {call} from "animejs";
 
 const tabId = ipcRenderer.sendSync('get-webcontents-id');
 
@@ -58,7 +59,7 @@ function getScrollStartPoint(x: number, y: number) {
     }
     n = n.parentElement;
   }
-  return { left, right };
+  return {left, right};
 }
 
 document.addEventListener('wheel', (e) => {
@@ -129,7 +130,7 @@ if (
     w.settings = settings;
     w.require = (id: string) => {
       if (id === 'electron') {
-        return { ipcRenderer };
+        return {ipcRenderer};
       }
       return undefined;
     };
@@ -154,7 +155,7 @@ if (
   (async function () {
     if (settings.doNotTrack) {
       const w = await webFrame.executeJavaScript('window');
-      Object.defineProperty(w.navigator, 'doNotTrack', { value: 1 });
+      Object.defineProperty(w.navigator, 'doNotTrack', {value: 1});
     }
   })();
 }
@@ -170,7 +171,7 @@ if (window.location.href.startsWith(WEBUI_BASE_URL)) {
     }
   });
 
-  window.addEventListener('message', async ({ data }) => {
+  window.addEventListener('message', async ({data}) => {
     if (data.type === 'storage') {
       const res = await ipcRenderer.invoke(`storage-${data.operation}`, {
         scope: data.scope,
@@ -185,7 +186,7 @@ if (window.location.href.startsWith(WEBUI_BASE_URL)) {
       );
       postMsg(data, res);
     } else if (data.type === 'save-settings') {
-      ipcRenderer.send('save-settings', { settings: data.data });
+      ipcRenderer.send('save-settings', {settings: data.data});
     } else if (data.type === 'show-adblock-rule') {
       ipcRenderer.send(`show-adblock-rule-${windowId}`);
     }
