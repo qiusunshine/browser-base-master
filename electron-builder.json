@@ -1,0 +1,59 @@
+{
+  "appId": "org.hiker.xiu",
+  "productName": "Xiu",
+  "nsis": {
+    "include": "static/installer.nsh",
+    "installerLanguages": ["zh_CN"]
+  },
+  "electronVersion": "28.1.4",
+  "generateUpdatesFilesForAllChannels": true,
+  "asar": false,
+  "directories": {
+    "output": "dist",
+    "buildResources": "static/icons"
+  },
+  "extraFiles": [
+    {
+      "from": "src/preloads/preload.js",
+      "to": "./resources/app/build/node_modules/electron-chrome-extensions/dist/preload.js"
+    }
+  ],
+  "files": ["build/**/*", "package.json", "static/**/*"],
+  "publish": "github",
+  "linux": {
+    "category": "Network",
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": ["x64"]
+      },
+      {
+        "target": "deb",
+        "arch": ["x64"]
+      }
+    ]
+  },
+  "win": {
+    "target": [
+      {
+        "target": "nsis-web",
+        "arch": ["x64", "ia32"]
+      },
+      {
+        "target": "zip",
+        "arch": ["x64", "ia32"]
+      }
+    ]
+  },
+  "mac": {
+    "category": "public.app-category.navigation"
+  },
+  "fileAssociations": [
+    {
+      "name": "Document",
+      "description": "Wexond",
+      "role": "Viewer",
+      "ext": "html"
+    }
+  ]
+}
