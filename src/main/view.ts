@@ -130,7 +130,21 @@ export class View {
             }
             return videos[0];
           }
-      `
+      `;
+      if(method == "other") {
+        return `
+        (() => {
+              ${find}
+              (async () => {
+                const video = findLargestPlayingVideo();
+                if (!video) {
+                  return;
+                }
+                video.pause();
+              })();
+        })();
+          `;
+      }
       if (method == "full") {
         return `
     (() => {
@@ -359,6 +373,16 @@ export class View {
     }
 
     ipcMain.on(`show-other-video-dialog-${this.id}`, async (e) => {
+      //暂停播放
+      const inject = getInjectJS("other");
+      this.webContents.executeJavaScript(inject, true);
+      for (let item of this.framesCache) {
+        const {frameProcessId, frameRoutingId} = item;
+        const frame = webFrameMain.fromId(frameProcessId, frameRoutingId);
+        if (frame) {
+          frame.executeJavaScript(inject, true);
+        }
+      }
       const url = this.videoUrls[0];
       let headers = {};
       for (let netVideoUrl of this.netVideoUrls) {
