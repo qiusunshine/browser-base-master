@@ -52,6 +52,7 @@ applyEntries(appConfig, [
   'downloads-dialog',
   'add-bookmark',
   'show-block',
+  'show-video',
   'zoom',
   'settings',
   'history',

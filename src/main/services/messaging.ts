@@ -18,6 +18,7 @@ import {showDownloadsDialog} from '../dialogs/downloads';
 import {showZoomDialog} from '../dialogs/zoom';
 import {showTabGroupDialog} from '../dialogs/tabgroup';
 import {showBlockDialog} from "~/main/dialogs/show-block";
+import {showVideoDialog} from "~/main/dialogs/show-video";
 
 export const runMessagingService = (appWindow: AppWindow) => {
   const {id} = appWindow;
@@ -92,6 +93,10 @@ export const runMessagingService = (appWindow: AppWindow) => {
 
   ipcMain.on(`show-add-bookmark-dialog-${id}`, (e, left, top) => {
     showAddBookmarkDialog(appWindow.win, left, top);
+  });
+
+  ipcMain.on(`show-video-dialog-${id}`, (e, left, top) => {
+    showVideoDialog(appWindow.win, left, top);
   });
 
   ipcMain.on(`show-block-dialog-${id}`, (e, left, top, data) => {

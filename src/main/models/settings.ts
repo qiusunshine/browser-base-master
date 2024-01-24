@@ -14,6 +14,7 @@ import {resolve} from "path";
 import {deletePath, pathExists, readFileAsText} from "~/utils/files";
 import {ChromeUserAgent} from "~/main/user-agent";
 import IpcMainEvent = Electron.IpcMainEvent;
+import {filterVideo, recordUrlRequest} from "~/main/services/xiu-video";
 
 export class Settings extends EventEmitter {
   public object = DEFAULT_SETTINGS;
@@ -229,7 +230,12 @@ export class Settings extends EventEmitter {
           details.requestHeaders["Accept-Language"] = "zh-CN,zh;q=0.9";
           obj.requestHeaders = details.requestHeaders;
         }
+        recordUrlRequest(details);
         callback(obj);
+      });
+      e.webRequest.onHeadersReceived({urls: ['<all_urls>']}, (details,callback) => {
+        filterVideo(details);
+        callback({});
       });
       if (this.object.shield) {
         runAdblockService(e);

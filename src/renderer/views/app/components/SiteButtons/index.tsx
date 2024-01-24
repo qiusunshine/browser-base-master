@@ -52,7 +52,7 @@ const onBlockClick = (e: React.MouseEvent<HTMLDivElement>) => {
     })), count
   });
 };
-const onVideoClick = (e: React.MouseEvent<HTMLDivElement>) => {
+const onVideoContextClick = (e: React.MouseEvent<HTMLDivElement>) => {
   const menu = remote.Menu.buildFromTemplate([
     {
       label: '全屏播放',
@@ -75,6 +75,11 @@ const onVideoClick = (e: React.MouseEvent<HTMLDivElement>) => {
   ]);
 
   menu.popup();
+};
+const onVideoClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const star = document.getElementById('video-btn');
+  const {right, bottom} = star.getBoundingClientRect();
+  ipcRenderer.send(`show-video-dialog-${store.windowId}`, right, bottom);
 };
 
 const onZoomClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -179,6 +184,7 @@ export const SiteButtons = observer(() => {
           icon={ICON_VIDEO}
           opacity={0.87}
           onClick={onVideoClick}
+          onContextMenu={onVideoContextClick}
         />
       )}
     </>

@@ -25,6 +25,10 @@ export class ViewManager extends EventEmitter {
   public get fullscreen() {
     return this._fullscreen;
   }
+  
+  public getById(id: number) {
+    return this.views.get(id);
+  }
 
   public set fullscreen(val: boolean) {
     this._fullscreen = val;
@@ -52,8 +56,12 @@ export class ViewManager extends EventEmitter {
       this.create(details);
     });
 
-    ipcMain.on('Print', (e, details) => {
-      this.views.get(this.selectedId).webContents.print();
+    ipcMain.on('open-dev-tool', (e, details) => {
+      //this.views.get(this.selectedId).webContents.print();
+      this.selected.webContents.inspectElement(0, 0);
+      if (this.selected.webContents.isDevToolsOpened()) {
+        this.selected.webContents.devToolsWebContents.focus();
+      }
     });
 
     ipcMain.handle(`view-select-${id}`, (e, id: number, focus: boolean) => {

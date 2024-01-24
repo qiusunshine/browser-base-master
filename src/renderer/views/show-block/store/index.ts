@@ -1,6 +1,5 @@
 import {ipcRenderer} from 'electron';
 import {makeObservable, observable} from 'mobx';
-import {IBookmark} from '~/interfaces';
 import * as React from 'react';
 import {DialogStore} from '~/models/dialog-store';
 

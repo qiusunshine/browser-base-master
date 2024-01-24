@@ -80,6 +80,7 @@ export class Store {
     menu: false,
     'add-bookmark': false,
     'show-block': false,
+    'show-video': false,
     zoom: false,
     'extension-popup': false,
     'downloads-dialog': false,

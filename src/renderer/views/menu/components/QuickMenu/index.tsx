@@ -28,7 +28,7 @@ import {
   ICON_EXTENSIONS,
   ICON_DOWNLOAD,
   ICON_FIND,
-  ICON_PRINT,
+  ICON_PRINT, ICON_ARROWBACK, ICON_MULTRIN, ICON_DASHBOARD,
 } from '~/renderer/constants/icons';
 import { getWebUIURL } from '~/common/webui';
 
@@ -48,7 +48,7 @@ const onDarkClick = () => {
 };
 
 const onPrintClick = () => {
-  ipcRenderer.send('Print', null);
+  ipcRenderer.send('open-dev-tool', null);
   store.hide();
 };
 
@@ -155,9 +155,9 @@ export const QuickMenu = observer(() => {
             <Shortcut>Ctrl+F</Shortcut>
           </MenuItem>
           <MenuItem onClick={onPrintClick}>
-            <Icon icon={ICON_PRINT} />
-            <MenuItemTitle>打印</MenuItemTitle>
-            <Shortcut>Ctrl+P</Shortcut>
+              <Icon icon={ICON_DASHBOARD} />
+            <MenuItemTitle>开发者工具</MenuItemTitle>
+            <Shortcut>Ctrl+Shift+I</Shortcut>
           </MenuItem>
         </MenuItems>
       </Content>
