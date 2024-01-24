@@ -118,6 +118,10 @@ const createWebview = (url: string, inspect: boolean) => {
       }
     }
   });
+  webview.addEventListener("will-navigate", (e) => {
+    window.open(e.url, "_blank");
+    e.preventDefault();
+  })
 
   container.appendChild(webview);
 };

@@ -42,8 +42,9 @@ const onDropdownClick = (e: React.MouseEvent<HTMLDivElement>) => {
   const { x, y } = remote.BrowserWindow.fromWebContents(
     remote.getCurrentWebContents(),
   ).getBounds();
+  menu.popup();
 
-  menu.popup({ x: x + left, y: y + top + height });
+  //menu.popup({ x: x + left, y: y + top + height });
 };
 
 const onRemove = () => {

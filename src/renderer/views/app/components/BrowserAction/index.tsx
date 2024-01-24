@@ -6,6 +6,7 @@ import { ipcRenderer } from 'electron';
 import * as remote from '@electron/remote';
 import store from '../../store';
 import { extensionMainChannel } from '~/common/rpc/extensions';
+import {Application} from "~/main/application";
 
 interface Props {
   data: IBrowserAction;
@@ -24,6 +25,7 @@ const showPopup = (
     top,
     data.popup,
     devtools,
+    data.extensionId
   );
 };
 
@@ -41,8 +43,8 @@ const onClick = (data: IBrowserAction) => (
     if(!data.popup) {
       onContextMenu(data)(e);
     } else {
-      const { right, bottom } = e.currentTarget.getBoundingClientRect();
-      showPopup(data, right, bottom, false);
+      const { left, top } = e.currentTarget.getBoundingClientRect();
+      showPopup(data, left, top, false);
     }
   }
 };
@@ -61,8 +63,8 @@ const onContextMenu = (data: IBrowserAction) => (
     {
       label: '检查',
       click: () => {
-        const { right, bottom } = (target as any).getBoundingClientRect();
-        showPopup(data, right, bottom, true);
+        const { left, top } = (target as any).getBoundingClientRect();
+        showPopup(data, left, top, true);
       },
     },
     {

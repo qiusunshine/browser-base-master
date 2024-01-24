@@ -16,7 +16,7 @@ export const getBookmarkTitle = (item: IBookmark) => {
     return '其它文件夹';
   }
 
-  return '';
+  return item.title;
 };
 
 export const addImported = async (arr: any[], parent: IBookmark = null) => {

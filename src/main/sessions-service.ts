@@ -54,28 +54,34 @@ export class SessionsService {
       ipcMain.handle('get-extensions', () => {
         return this.extensions;
       });
+      let modulePath;
+      if (process.env.NODE_ENV === 'development') {
+        modulePath = require('path').join(require('path').dirname(__dirname), 'node_modules/electron-chrome-extensions');
+      } else {
+        modulePath = require('path').join(__dirname, 'node_modules/electron-chrome-extensions');
+      }
       this.chromeExtensions = new ElectronChromeExtensions({
-        modulePath: require('path').join(__dirname, 'node_modules/electron-chrome-extensions'),
+        modulePath: modulePath,
         session: this.view,
         assignTabDetails(details: chrome.tabs.Tab, tab: Electron.WebContents) {
 
         },
         createTab(details) {
           return new Promise(resolve1 => {
-            const view = Application.instance.windows.list
-              .find((x) => x.win.id === details.windowId)
+            const view = (Application.instance.windows.list
+              .find((x) => x.win.id === details.windowId) || Application.instance.windows.current)
               .viewManager.create(details, true, true);
             return [view.webContents, view.window.win];
           })
         },
         selectTab(tab, browserWindow) {
-          Application.instance.windows.list
-            .find((x) => x.win.id === browserWindow.id)
+          (Application.instance.windows.list
+            .find((x) => x.win.id === browserWindow.id) || Application.instance.windows.current)
             .viewManager.select(tab.id, true, false)
         },
         removeTab(tab, browserWindow) {
-          Application.instance.windows.list
-            .find((x) => x.win.id === browserWindow.id)
+          (Application.instance.windows.list
+            .find((x) => x.win.id === browserWindow.id) || Application.instance.windows.current)
             .viewManager.removeByTabId(tab.id);
         },
         createWindow(details) {
@@ -292,6 +298,8 @@ export class SessionsService {
               window.send('load-browserAction', extension);
             }
           }
+          this.extensions = this.extensions.filter(it => it.id != extension.id);
+          this.extensions.push(extension);
           return extension
         }
       } catch (err) {
@@ -321,14 +329,10 @@ export class SessionsService {
       }
 
       await extractZip(crxInfo.zip, path);
-
-      const extension = await this.view.loadExtension(path, {allowFileAccess: true});
-      console.log(extension);
       const manifest = JSON.parse(
         await promises.readFile(manifestPath, 'utf8'),
       );
       if (manifest) {
-        saveNewTabUrl(crxInfo.id, manifest, extension);
         if (crxInfo.publicKey) {
           manifest.key = crxInfo.publicKey.toString('base64');
           await promises.writeFile(
@@ -337,6 +341,14 @@ export class SessionsService {
           );
         }
       }
+
+      const extension = await this.view.loadExtension(path, {allowFileAccess: true});
+      console.log(extension);
+      if (manifest) {
+        saveNewTabUrl(crxInfo.id, manifest, extension);
+      }
+      this.extensions = this.extensions.filter(it => it.id != extension.id);
+      this.extensions.push(extension);
       return extension;
     }
 
@@ -437,7 +449,7 @@ export class SessionsService {
         window.send('download-progress', data);
 
         Object.assign(downloadItem, data);
-        if(webContents.getURL() == item.getURL()) {
+        if (webContents.getURL() == item.getURL()) {
           webContents.goBack();
         }
       });
@@ -602,6 +614,7 @@ export class SessionsService {
 
     const extension = this.view.getExtension(id);
     if (!extension) return;
+    this.extensions = this.extensions.filter(it => it.id != id);
 
     await this.view.removeExtension(id);
 

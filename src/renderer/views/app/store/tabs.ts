@@ -147,6 +147,7 @@ export class TabsStore {
         if (event === 'loading') tab.loading = args[0];
         if (event === 'pinned') tab.isPinned = args[0];
         if (event === 'credentials') tab.hasCredentials = args[0];
+        if (event === 'xiu-video') tab.videoUrls = args[0] || [];
 
         if (event === 'url-updated') {
           const [url] = args;

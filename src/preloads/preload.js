@@ -1,559 +1,703 @@
-/******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ({
+console.log("load preload.js");
 
-/***/ "./src/renderer/event.ts":
-/*!*******************************!*\
-  !*** ./src/renderer/event.ts ***!
-  \*******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/******/
+(() => { // webpackBootstrap
+  /******/
+  "use strict";
+  /******/
+  var __webpack_modules__ = ({
 
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "addExtensionListener": () => (/* binding */ addExtensionListener),
-/* harmony export */   "removeExtensionListener": () => (/* binding */ removeExtensionListener)
-/* harmony export */ });
-/* harmony import */ var electron__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! electron */ "electron");
-/* harmony import */ var electron__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(electron__WEBPACK_IMPORTED_MODULE_0__);
+    /***/ "./src/renderer/event.ts":
+    /*!*******************************!*\
+      !*** ./src/renderer/event.ts ***!
+      \*******************************/
+    /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-const formatIpcName = name => `crx-${name}`;
-const listenerMap = new Map();
-const addExtensionListener = (extensionId, name, callback, ...opts) => {
-  const listenerCount = listenerMap.get(name) || 0;
-  if (listenerCount === 0) {
-    // TODO: should these IPCs be batched in a microtask?
-    electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.send(name.startsWith("xiu.") ? "xiu-crx-add-listener" : 'crx-add-listener', extensionId, name, ...opts);
-  }
-  listenerMap.set(name, listenerCount + 1);
-  electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.addListener(formatIpcName(name), function (event, ...args) {
-    if (true) {
-      console.log(name, '(result)', ...args);
-    }
-    callback(...args);
-  });
-};
-const removeExtensionListener = (extensionId, name, callback) => {
-  if (listenerMap.has(name)) {
-    const listenerCount = listenerMap.get(name) || 0;
-    if (listenerCount <= 1) {
-      listenerMap.delete(name);
-      electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.send(name.startsWith("xiu.") ? "xiu-crx-remove-listener" : 'crx-remove-listener', extensionId, name);
-    } else {
-      listenerMap.set(name, listenerCount - 1);
-    }
-  }
-  electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.removeListener(formatIpcName(name), callback);
-};
+      __webpack_require__.r(__webpack_exports__);
+      /* harmony export */
+      __webpack_require__.d(__webpack_exports__, {
+        /* harmony export */   "addExtensionListener": () => (/* binding */ addExtensionListener),
+        /* harmony export */   "removeExtensionListener": () => (/* binding */ removeExtensionListener)
+        /* harmony export */
+      });
+      /* harmony import */
+      var electron__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! electron */ "electron");
+      /* harmony import */
+      var electron__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(electron__WEBPACK_IMPORTED_MODULE_0__);
 
-/***/ }),
+      const formatIpcName = name => `crx-${name}`;
+      const listenerMap = new Map();
+      const addExtensionListener = (extensionId, name, callback) => {
+        const listenerCount = listenerMap.get(name) || 0;
+        if (listenerCount === 0) {
+          // TODO: should these IPCs be batched in a microtask?
+          electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.send('crx-add-listener', extensionId, name);
+        }
+        listenerMap.set(name, listenerCount + 1);
+        electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.addListener(formatIpcName(name), function (event, ...args) {
+          if (true) {
+            console.log(name, '(result)', ...args);
+          }
+          callback(...args);
+        });
+      };
+      const removeExtensionListener = (extensionId, name, callback) => {
+        if (listenerMap.has(name)) {
+          const listenerCount = listenerMap.get(name) || 0;
+          if (listenerCount <= 1) {
+            listenerMap.delete(name);
+            electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.send('crx-remove-listener', extensionId, name);
+          } else {
+            listenerMap.set(name, listenerCount - 1);
+          }
+        }
+        electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.removeListener(formatIpcName(name), callback);
+      };
 
-/***/ "./src/renderer/index.ts":
-/*!*******************************!*\
-  !*** ./src/renderer/index.ts ***!
-  \*******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+      /***/
+    }),
 
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "injectExtensionAPIs": () => (/* binding */ injectExtensionAPIs)
-/* harmony export */ });
-/* harmony import */ var electron__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! electron */ "electron");
-/* harmony import */ var electron__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(electron__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./event */ "./src/renderer/event.ts");
+    /***/ "./src/renderer/index.ts":
+    /*!*******************************!*\
+      !*** ./src/renderer/index.ts ***!
+      \*******************************/
+    /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+      __webpack_require__.r(__webpack_exports__);
+      /* harmony export */
+      __webpack_require__.d(__webpack_exports__, {
+        /* harmony export */   "injectExtensionAPIs": () => (/* binding */ injectExtensionAPIs)
+        /* harmony export */
+      });
+      /* harmony import */
+      var electron__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! electron */ "electron");
+      /* harmony import */
+      var electron__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(electron__WEBPACK_IMPORTED_MODULE_0__);
+      /* harmony import */
+      var _event__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./event */ "./src/renderer/event.ts");
 
 
-const injectExtensionAPIs = () => {
-  const invokeExtension = async function (extensionId, fnName, options = {}, ...args) {
-    const callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-    if (true) {
-      console.log(fnName, args);
-    }
-    if (options.noop) {
-      console.warn(`${fnName} is not yet implemented.`);
-      if (callback) callback();
-      return;
-    }
-    if (options.serialize) {
-      args = options.serialize(...args);
-    }
-    let result;
-    try {
-      result = await electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.invoke('crx-msg', extensionId, fnName, ...args);
-    } catch (e) {
-      // TODO: Set chrome.runtime.lastError?
-      console.error(e);
-      result = undefined;
-    }
-    if (true) {
-      console.log(fnName, '(result)', result);
-    }
-    if (callback) {
-      callback(result);
-    } else {
-      return result;
-    }
-  };
-  const electronContext = {
-    invokeExtension,
-    addExtensionListener: _event__WEBPACK_IMPORTED_MODULE_1__.addExtensionListener,
-    removeExtensionListener: _event__WEBPACK_IMPORTED_MODULE_1__.removeExtensionListener
-  };
+      const injectExtensionAPIs = () => {
+        const invokeExtension = async function (extensionId, fnName, options = {}, ...args) {
+          const callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+          if (true) {
+            console.log(fnName, args);
+          }
+          if (options.noop) {
+            console.warn(`${fnName} is not yet implemented.`);
+            if (callback) callback();
+            return;
+          }
+          if (options.serialize) {
+            args = options.serialize(...args);
+          }
+          let result;
+          try {
+            result = await electron__WEBPACK_IMPORTED_MODULE_0__.ipcRenderer.invoke(fnName.startsWith("hiker") ? 'hiker-crx-msg' : 'crx-msg', extensionId, fnName, ...args);
+          } catch (e) {
+            // TODO: Set chrome.runtime.lastError?
+            console.error(e);
+            result = undefined;
+          }
+          if (true) {
+            console.log(fnName, '(result)', result);
+          }
+          if (callback) {
+            callback(result);
+          } else {
+            return result;
+          }
+        };
+        const electronContext = {
+          invokeExtension,
+          addExtensionListener: _event__WEBPACK_IMPORTED_MODULE_1__.addExtensionListener,
+          removeExtensionListener: _event__WEBPACK_IMPORTED_MODULE_1__.removeExtensionListener
+        };
 
-  // Function body to run in the main world.
-  // IMPORTANT: This must be self-contained, no closure variable will be included!
-  function mainWorldScript() {
-    var _chrome$runtime;
-    // Use context bridge API or closure variable when context isolation is disabled.
-    const electron = window.electron || electronContext;
-    const chrome = window.chrome || {};
-    const extensionId = (_chrome$runtime = chrome.runtime) === null || _chrome$runtime === void 0 ? void 0 : _chrome$runtime.id;
+        // Function body to run in the main world.
+        // IMPORTANT: This must be self-contained, no closure variable will be included!
+        function mainWorldScript() {
+          var _chrome$runtime;
+          // Use context bridge API or closure variable when context isolation is disabled.
+          const electron = window.electron || electronContext;
+          const chrome = window.chrome || {};
+          const extensionId = (_chrome$runtime = chrome.runtime) === null || _chrome$runtime === void 0 ? void 0 : _chrome$runtime.id;
 
-    // NOTE: This uses a synchronous IPC to get the extension manifest.
-    // To avoid this, JS bindings for RendererExtensionRegistry would be
-    // required.
-    const manifest = extensionId && chrome.runtime.getManifest() || {};
-    const invokeExtension = (fnName, opts = {}) => (...args) => electron.invokeExtension(extensionId, fnName, opts, ...args);
-    function imageData2base64(imageData) {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return null;
-      canvas.width = imageData.width;
-      canvas.height = imageData.height;
-      ctx.putImageData(imageData, 0, 0);
-      return canvas.toDataURL();
-    }
-    class ExtensionEvent {
-      constructor(name) {
-        this.name = name;
-      }
-      addListener(callback, ...args) {
-        electron.addExtensionListener(extensionId, this.name, callback, ...args);
-      }
-      removeListener(callback) {
-        electron.removeExtensionListener(extensionId, this.name, callback);
-      }
-      getRules(ruleIdentifiers, callback) {
-        throw new Error('Method not implemented.');
-      }
-      hasListener(callback) {
-        throw new Error('Method not implemented.');
-      }
-      removeRules(ruleIdentifiers, callback) {
-        throw new Error('Method not implemented.');
-      }
-      addRules(rules, callback) {
-        throw new Error('Method not implemented.');
-      }
-      hasListeners() {
-        throw new Error('Method not implemented.');
-      }
-    }
-    class ChromeSetting {
-      set() {}
-      get() {}
-      clear() {}
-      // onChange: chrome.types.ChromeSettingChangedEvent
-    }
+          // NOTE: This uses a synchronous IPC to get the extension manifest.
+          // To avoid this, JS bindings for RendererExtensionRegistry would be
+          // required.
+          const manifest = extensionId && chrome.runtime.getManifest() || {};
+          const invokeExtension = (fnName, opts = {}) => (...args) => electron.invokeExtension(extensionId, fnName, opts, ...args);
 
-    /**
-     * Factories for each additional chrome.* API.
-     */
-    const apiDefinitions = {
-      browserAction: {
-        shouldInject: () => !!manifest.browser_action,
-        factory: base => {
-          const api = {
-            ...base,
-            setTitle: invokeExtension('browserAction.setTitle'),
-            getTitle: invokeExtension('browserAction.getTitle'),
-            setIcon: invokeExtension('browserAction.setIcon', {
-              serialize: details => {
-                if (details.imageData) {
-                  if (details.imageData instanceof ImageData) {
-                    details.imageData = imageData2base64(details.imageData);
-                  } else {
-                    details.imageData = Object.entries(details.imageData).reduce((obj, pair) => {
-                      obj[pair[0]] = imageData2base64(pair[1]);
-                      return obj;
-                    }, {});
+          function imageData2base64(imageData) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return null;
+            canvas.width = imageData.width;
+            canvas.height = imageData.height;
+            ctx.putImageData(imageData, 0, 0);
+            return canvas.toDataURL();
+          }
+
+          class ExtensionEvent {
+            constructor(name) {
+              this.name = name;
+            }
+
+            addListener(callback) {
+              electron.addExtensionListener(extensionId, this.name, callback);
+            }
+
+            removeListener(callback) {
+              electron.removeExtensionListener(extensionId, this.name, callback);
+            }
+
+            getRules(ruleIdentifiers, callback) {
+              throw new Error('Method not implemented.');
+            }
+
+            hasListener(callback) {
+              throw new Error('Method not implemented.');
+            }
+
+            removeRules(ruleIdentifiers, callback) {
+              throw new Error('Method not implemented.');
+            }
+
+            addRules(rules, callback) {
+              throw new Error('Method not implemented.');
+            }
+
+            hasListeners() {
+              throw new Error('Method not implemented.');
+            }
+          }
+
+          class ChromeSetting {
+            set() {
+            }
+
+            get() {
+            }
+
+            clear() {
+            }
+
+            // onChange: chrome.types.ChromeSettingChangedEvent
+          }
+
+          /**
+           * Factories for each additional chrome.* API.
+           */
+          const apiDefinitions = {
+            browserAction: {
+              shouldInject: () => !!manifest.browser_action,
+              factory: base => {
+                const api = {
+                  hikerModify: true,
+                  ...base,
+                  setTitle: invokeExtension('browserAction.setTitle'),
+                  getTitle: invokeExtension('browserAction.getTitle'),
+                  setIcon: invokeExtension('browserAction.setIcon', {
+                    serialize: details => {
+                      if (details.imageData) {
+                        if (details.imageData instanceof ImageData) {
+                          details.imageData = imageData2base64(details.imageData);
+                        } else {
+                          details.imageData = Object.entries(details.imageData).reduce((obj, pair) => {
+                            obj[pair[0]] = imageData2base64(pair[1]);
+                            return obj;
+                          }, {});
+                        }
+                      }
+                      return [details];
+                    }
+                  }),
+                  setPopup: invokeExtension('browserAction.setPopup'),
+                  getPopup: invokeExtension('browserAction.getPopup'),
+                  setBadgeText: invokeExtension('browserAction.setBadgeText'),
+                  getBadgeText: invokeExtension('browserAction.getBadgeText'),
+                  setBadgeBackgroundColor: invokeExtension('browserAction.setBadgeBackgroundColor'),
+                  getBadgeBackgroundColor: invokeExtension('browserAction.getBadgeBackgroundColor'),
+                  enable: invokeExtension('browserAction.enable', {
+                    noop: true
+                  }),
+                  disable: invokeExtension('browserAction.disable', {
+                    noop: true
+                  }),
+                  onClicked: new ExtensionEvent('browserAction.onClicked')
+                };
+                return api;
+              }
+            },
+            commands: {
+              factory: base => {
+                return {
+                  hikerModify: true,
+                  ...base,
+                  getAll: invokeExtension('hiker.commands.getAll'),
+                  onCommand: new ExtensionEvent('commands.onCommand')
+                };
+              }
+            },
+            contextMenus: {
+              factory: base => {
+                let menuCounter = 0;
+                const menuCallbacks = {};
+                const menuCreate = invokeExtension('contextMenus.create');
+                let hasInternalListener = false;
+                const addInternalListener = () => {
+                  api.onClicked.addListener((info, tab) => {
+                    const callback = menuCallbacks[info.menuItemId];
+                    if (callback && tab) callback(info, tab);
+                  });
+                  hasInternalListener = true;
+                };
+                const api = {
+                  hikerModify: true,
+                  ...base,
+                  create: function (createProperties, callback) {
+                    if (typeof createProperties.id === 'undefined') {
+                      createProperties.id = `${++menuCounter}`;
+                    }
+                    if (createProperties.onclick) {
+                      if (!hasInternalListener) addInternalListener();
+                      menuCallbacks[createProperties.id] = createProperties.onclick;
+                      delete createProperties.onclick;
+                    }
+                    menuCreate(createProperties, callback);
+                    return createProperties.id;
+                  },
+                  update: invokeExtension('contextMenus.update', {
+                    noop: true
+                  }),
+                  remove: invokeExtension('contextMenus.remove'),
+                  removeAll: invokeExtension('contextMenus.removeAll'),
+                  onClicked: new ExtensionEvent('contextMenus.onClicked')
+                };
+                return api;
+              }
+            },
+            cookies: {
+              factory: base => {
+                return {
+                  hikerModify: true,
+                  ...base,
+                  get: invokeExtension('cookies.get'),
+                  getAll: invokeExtension('cookies.getAll'),
+                  set: invokeExtension('cookies.set'),
+                  remove: invokeExtension('cookies.remove'),
+                  getAllCookieStores: invokeExtension('cookies.getAllCookieStores'),
+                  onChanged: new ExtensionEvent('cookies.onChanged')
+                };
+              }
+            },
+            extension: {
+              factory: base => {
+                return Object.assign(Object.assign({}, base), {
+                  hikerModify: true,
+                  // TODO: Add native implementation
+                  getViews: () => [],
+                  isAllowedFileSchemeAccess: e => e && e(!1),
+                  isAllowedIncognitoAccess: e => e && e(!1)
+                });
+              }
+            },
+            notifications: {
+              factory: base => {
+                return {
+                  hikerModify: true,
+                  ...base,
+                  clear: invokeExtension('notifications.clear'),
+                  create: invokeExtension('notifications.create'),
+                  getAll: invokeExtension('notifications.getAll'),
+                  getPermissionLevel: invokeExtension('notifications.getPermissionLevel'),
+                  update: invokeExtension('notifications.update'),
+                  onClicked: new ExtensionEvent('notifications.onClicked'),
+                  onButtonClicked: new ExtensionEvent('notifications.onButtonClicked'),
+                  onClosed: new ExtensionEvent('notifications.onClosed')
+                };
+              }
+            },
+            privacy: {
+              factory: base => {
+                return {
+                  hikerModify: true,
+                  ...base,
+                  network: {
+                    networkPredictionEnabled: new ChromeSetting(),
+                    webRTCIPHandlingPolicy: new ChromeSetting()
+                  },
+                  websites: {
+                    hyperlinkAuditingEnabled: new ChromeSetting()
+                  }
+                };
+              }
+            },
+            runtime: {
+              factory: base => {
+                return {
+                  hikerModify: true,
+                  ...base,
+                  openOptionsPage: invokeExtension('runtime.openOptionsPage')
+                };
+              }
+            },
+            storage: {
+              factory: base => {
+                const local = base && base.local;
+                return {
+                  hikerModify: true,
+                  ...base,
+                  // TODO: provide a backend for browsers to opt-in to
+                  managed: local,
+                  sync: local
+                };
+              }
+            },
+            downloads: {
+              factory: base => {
+                return {
+                  hikerModify: true,
+                  onChanged: {
+                    addListener: function (item) {
+                      
+                    }
+                  },
+                  ...(base || {}),
+                };
+              }
+            },
+            tabs: {
+              factory: base => {
+                const a = {};
+                if(base.sendMessage) {
+                  const sendMessage00 = base.sendMessage;
+                  a.sendMessage = function (tabId,message,options,callback) {
+                    if(options === undefined && callback === undefined) {
+                      return sendMessage00(tabId,message);
+                    }
+                    if(typeof options == "function" || callback === undefined) {
+                      return sendMessage00(tabId,message,options);
+                    }
+                    try {
+                      if (options && callback && options["frameId"] == 0) {
+                        //丢弃options参数，因为测试electron会直接调用callback(undefined);
+                        return sendMessage00(tabId, message, callback);
+                      }
+                    } catch (e) {
+                      console.log(e);
+                    }
+                    return sendMessage00(tabId,message,options,callback);
                   }
                 }
-                return [details];
-              }
-            }),
-            setPopup: invokeExtension('browserAction.setPopup'),
-            getPopup: invokeExtension('browserAction.getPopup'),
-            setBadgeText: invokeExtension('browserAction.setBadgeText'),
-            getBadgeText: invokeExtension('browserAction.getBadgeText'),
-            setBadgeBackgroundColor: invokeExtension('browserAction.setBadgeBackgroundColor'),
-            getBadgeBackgroundColor: invokeExtension('browserAction.getBadgeBackgroundColor'),
-            enable: invokeExtension('browserAction.enable', {
-              noop: true
-            }),
-            disable: invokeExtension('browserAction.disable', {
-              noop: true
-            }),
-            onClicked: new ExtensionEvent('browserAction.onClicked')
-          };
-          return api;
-        }
-      },
-      commands: {
-        factory: base => {
-          return {
-            ...base,
-            getAll: invokeExtension('commands.getAll'),
-            onCommand: new ExtensionEvent('commands.onCommand')
-          };
-        }
-      },
-      contextMenus: {
-        factory: base => {
-          let menuCounter = 0;
-          const menuCallbacks = {};
-          const menuCreate = invokeExtension('contextMenus.create');
-          let hasInternalListener = false;
-          const addInternalListener = () => {
-            api.onClicked.addListener((info, tab) => {
-              const callback = menuCallbacks[info.menuItemId];
-              if (callback && tab) callback(info, tab);
-            });
-            hasInternalListener = true;
-          };
-          const api = {
-            ...base,
-            create: function (createProperties, callback) {
-              if (typeof createProperties.id === 'undefined') {
-                createProperties.id = `${++menuCounter}`;
-              }
-              if (createProperties.onclick) {
-                if (!hasInternalListener) addInternalListener();
-                menuCallbacks[createProperties.id] = createProperties.onclick;
-                delete createProperties.onclick;
-              }
-              menuCreate(createProperties, callback);
-              return createProperties.id;
-            },
-            update: invokeExtension('contextMenus.update', {
-              noop: true
-            }),
-            remove: invokeExtension('contextMenus.remove'),
-            removeAll: invokeExtension('contextMenus.removeAll'),
-            onClicked: new ExtensionEvent('contextMenus.onClicked')
-          };
-          return api;
-        }
-      },
-      cookies: {
-        factory: base => {
-          return {
-            ...base,
-            get: invokeExtension('cookies.get'),
-            getAll: invokeExtension('cookies.getAll'),
-            set: invokeExtension('cookies.set'),
-            remove: invokeExtension('cookies.remove'),
-            getAllCookieStores: invokeExtension('cookies.getAllCookieStores'),
-            onChanged: new ExtensionEvent('cookies.onChanged')
-          };
-        }
-      },
-      extension: {
-        factory: base => {
-          return Object.assign(Object.assign({}, base), {
-            // TODO: Add native implementation
-            getViews: () => [],
-            isAllowedFileSchemeAccess: e => e && e(!1),
-            isAllowedIncognitoAccess: e => e && e(!1)
-          });
-        }
-      },
-      notifications: {
-        factory: base => {
-          return {
-            ...base,
-            clear: invokeExtension('notifications.clear'),
-            create: invokeExtension('notifications.create'),
-            getAll: invokeExtension('notifications.getAll'),
-            getPermissionLevel: invokeExtension('notifications.getPermissionLevel'),
-            update: invokeExtension('notifications.update'),
-            onClicked: new ExtensionEvent('notifications.onClicked'),
-            onButtonClicked: new ExtensionEvent('notifications.onButtonClicked'),
-            onClosed: new ExtensionEvent('notifications.onClosed')
-          };
-        }
-      },
-      privacy: {
-        factory: base => {
-          return {
-            ...base,
-            network: {
-              networkPredictionEnabled: new ChromeSetting(),
-              webRTCIPHandlingPolicy: new ChromeSetting()
-            },
-            websites: {
-              hyperlinkAuditingEnabled: new ChromeSetting()
-            }
-          };
-        }
-      },
-      runtime: {
-        factory: base => {
-          return {
-            ...base,
-            openOptionsPage: invokeExtension('runtime.openOptionsPage')
-          };
-        }
-      },
-      storage: {
-        factory: base => {
-          const local = base && base.local;
-          return {
-            ...base,
-            // TODO: provide a backend for browsers to opt-in to
-            managed: local,
-            sync: local
-          };
-        }
-      },
-      tabs: {
-        factory: base => {
-          const api = {
-            ...base,
-            create: (options, callback) => {
-              if(callback) {
-                const obj = invokeExtension('tabs.create')(options, callback);
-                callback(obj);
-              } else {
-                return invokeExtension('tabs.create')(options, callback);
+                const api = {
+                  hikerModify: true,
+                  ...base,
+                  ...a,
+                  create: (options, callback) => {
+                    if (callback) {
+                      const obj = invokeExtension('tabs.create')(options, callback);
+                      callback(obj);
+                    } else {
+                      return invokeExtension('tabs.create')(options, callback);
+                    }
+                  },
+                  executeScript: function (arg1, arg2, arg3) {
+                    // Electron's implementation of chrome.tabs.executeScript is in
+                    // C++, but it doesn't support implicit execution in the active
+                    // tab. To handle this, we need to get the active tab ID and
+                    // pass it into the C++ implementation ourselves.
+                    if (typeof arg1 === 'object') {
+                      api.query({
+                        active: true,
+                        windowId: chrome.windows.WINDOW_ID_CURRENT
+                      }, ([activeTab]) => {
+                        api.executeScript(activeTab.id, arg1, arg2);
+                      });
+                    } else {
+                      ;
+                      base.executeScript(arg1, arg2, arg3);
+                    }
+                  },
+                  get: invokeExtension('tabs.get'),
+                  getCurrent: invokeExtension('tabs.getCurrent'),
+                  getAllInWindow: invokeExtension('tabs.getAllInWindow'),
+                  insertCSS: invokeExtension('tabs.insertCSS'),
+                  query: invokeExtension('tabs.query'),
+                  reload: invokeExtension('tabs.reload'),
+                  update: invokeExtension('tabs.update'),
+                  remove: invokeExtension('tabs.remove'),
+                  goBack: invokeExtension('tabs.goBack'),
+                  goForward: invokeExtension('tabs.goForward'),
+                  onCreated: new ExtensionEvent('tabs.onCreated'),
+                  onRemoved: new ExtensionEvent('tabs.onRemoved'),
+                  onUpdated: new ExtensionEvent('tabs.onUpdated'),
+                  onActivated: new ExtensionEvent('tabs.onActivated'),
+                  onReplaced: new ExtensionEvent('tabs.onReplaced')
+                };
+                return api;
               }
             },
-            executeScript: function (arg1, arg2, arg3) {
-              // Electron's implementation of chrome.tabs.executeScript is in
-              // C++, but it doesn't support implicit execution in the active
-              // tab. To handle this, we need to get the active tab ID and
-              // pass it into the C++ implementation ourselves.
-              if (typeof arg1 === 'object') {
-                api.query({
-                  active: true,
-                  windowId: chrome.windows.WINDOW_ID_CURRENT
-                }, ([activeTab]) => {
-                  api.executeScript(activeTab.id, arg1, arg2);
+            webNavigation: {
+              factory: base => {
+                return {
+                  hikerModify: true,
+                  ...base,
+                  getFrame: invokeExtension('webNavigation.getFrame'),
+                  getAllFrames: invokeExtension('webNavigation.getAllFrames'),
+                  onBeforeNavigate: new ExtensionEvent('webNavigation.onBeforeNavigate'),
+                  onCommitted: new ExtensionEvent('webNavigation.onCommitted'),
+                  onCompleted: new ExtensionEvent('webNavigation.onCompleted'),
+                  onCreatedNavigationTarget: new ExtensionEvent('webNavigation.onCreatedNavigationTarget'),
+                  onDOMContentLoaded: new ExtensionEvent('webNavigation.onDOMContentLoaded'),
+                  onErrorOccurred: new ExtensionEvent('webNavigation.onErrorOccurred'),
+                  onHistoryStateUpdated: new ExtensionEvent('webNavigation.onHistoryStateUpdated'),
+                  onReferenceFragmentUpdated: new ExtensionEvent('webNavigation.onReferenceFragmentUpdated'),
+                  onTabReplaced: new ExtensionEvent('webNavigation.onTabReplaced')
+                };
+              }
+            },
+            i18n: {
+              factory: base => {
+                return {
+                  hikerModify: true,
+                  ...(base || {}),
+                  getUILanguage: () => {
+                    return "zh-CN";
+                  }
+                };
+              }
+            },
+            // webRequest: {
+            //   factory: base => {
+            //     return {
+            //       hikerModify: true,
+            //       ...base,
+            //       onHeadersReceived: new ExtensionEvent('webRequest.onHeadersReceived')
+            //     };
+            //   }
+            // },
+            windows: {
+              factory: base => {
+                return {
+                  hikerModify: true,
+                  ...base,
+                  WINDOW_ID_NONE: -1,
+                  WINDOW_ID_CURRENT: -2,
+                  get: invokeExtension('windows.get'),
+                  getLastFocused: invokeExtension('windows.getLastFocused'),
+                  getAll: invokeExtension('windows.getAll'),
+                  create: invokeExtension('windows.create'),
+                  update: invokeExtension('windows.update'),
+                  remove: invokeExtension('windows.remove'),
+                  onCreated: new ExtensionEvent('windows.onCreated'),
+                  onRemoved: new ExtensionEvent('windows.onRemoved'),
+                  onFocusChanged: new ExtensionEvent('windows.onFocusChanged')
+                };
+              }
+            },
+            permissions: {
+              factory: base => {
+                return Object.assign(Object.assign({}, chrome.permissions), {
+                  hikerModify: true,
+                  contains: base && base.contains? base.contains : function (obj, callback) {
+                    try {
+                      callback && callback(false);
+                    } catch (e) {
+                      console.log(e);
+                    }
+                    return false;
+                  }
                 });
-              } else {
-                ;
-                base.executeScript(arg1, arg2, arg3);
               }
             },
-            get: invokeExtension('tabs.get'),
-            getCurrent: invokeExtension('tabs.getCurrent'),
-            getAllInWindow: invokeExtension('tabs.getAllInWindow'),
-            insertCSS: invokeExtension('tabs.insertCSS'),
-            query: invokeExtension('tabs.query'),
-            reload: invokeExtension('tabs.reload'),
-            update: invokeExtension('tabs.update'),
-            remove: invokeExtension('tabs.remove'),
-            goBack: invokeExtension('tabs.goBack'),
-            goForward: invokeExtension('tabs.goForward'),
-            onCreated: new ExtensionEvent('tabs.onCreated'),
-            onRemoved: new ExtensionEvent('tabs.onRemoved'),
-            onUpdated: new ExtensionEvent('tabs.onUpdated'),
-            onActivated: new ExtensionEvent('tabs.onActivated'),
-            onReplaced: new ExtensionEvent('tabs.onReplaced')
           };
-          return api;
-        }
-      },
-      webNavigation: {
-        factory: base => {
-          return {
-            ...base,
-            getFrame: invokeExtension('webNavigation.getFrame'),
-            getAllFrames: invokeExtension('webNavigation.getAllFrames'),
-            onBeforeNavigate: new ExtensionEvent('webNavigation.onBeforeNavigate'),
-            onCommitted: new ExtensionEvent('webNavigation.onCommitted'),
-            onCompleted: new ExtensionEvent('webNavigation.onCompleted'),
-            onCreatedNavigationTarget: new ExtensionEvent('webNavigation.onCreatedNavigationTarget'),
-            onDOMContentLoaded: new ExtensionEvent('webNavigation.onDOMContentLoaded'),
-            onErrorOccurred: new ExtensionEvent('webNavigation.onErrorOccurred'),
-            onHistoryStateUpdated: new ExtensionEvent('webNavigation.onHistoryStateUpdated'),
-            onReferenceFragmentUpdated: new ExtensionEvent('webNavigation.onReferenceFragmentUpdated'),
-            onTabReplaced: new ExtensionEvent('webNavigation.onTabReplaced')
-          };
-        }
-      },
-      webRequest: {
-        factory: base => {
-          return {
-            ...base,
-            onHeadersReceived: new ExtensionEvent('webRequest.onHeadersReceived'),
-            // onBeforeRedirect: new ExtensionEvent('xiu.onBeforeRedirect'),
-            // onBeforeRequest: new ExtensionEvent('xiu.onBeforeRequest'),
-            // onBeforeSendHeaders: new ExtensionEvent('xiu.onBeforeSendHeaders'),
-            // onResponseStarted: new ExtensionEvent('xiu.onResponseStarted')
-          };
-        }
-      },
-      windows: {
-        factory: base => {
-          return {
-            ...base,
-            WINDOW_ID_NONE: -1,
-            WINDOW_ID_CURRENT: -2,
-            get: invokeExtension('windows.get'),
-            getLastFocused: invokeExtension('windows.getLastFocused'),
-            getAll: invokeExtension('windows.getAll'),
-            create: invokeExtension('windows.create'),
-            update: invokeExtension('windows.update'),
-            remove: invokeExtension('windows.remove'),
-            onCreated: new ExtensionEvent('windows.onCreated'),
-            onRemoved: new ExtensionEvent('windows.onRemoved'),
-            onFocusChanged: new ExtensionEvent('windows.onFocusChanged')
-          };
-        }
-      },
-      permissions: {
-        factory: base => {
-          return Object.assign(Object.assign({}, chrome.permissions), {
+
+          //Initialize APIs
+          Object.keys(apiDefinitions).forEach(key => {
+            const apiName = key;
+            const baseApi = chrome[apiName];
+            const api = apiDefinitions[apiName];
+
+            // Allow APIs to opt-out of being available in this context.
+            if (api.shouldInject && !api.shouldInject()) return;
+            try {
+              console.log("preload", "define", key);
+              chrome[apiName] = api.factory(baseApi);
+              if (chrome[apiName] && !chrome[apiName].hikerModify) {
+                //没有修改成功
+                Object.defineProperty(chrome, apiName, {
+                  value: api.factory(baseApi),
+                  enumerable: true,
+                  configurable: true
+                });
+              }
+            } catch (e) {
+              console.log("define error", e);
+            }
           });
+
+          // Remove access to internals
+          delete window.electron;
+          Object.freeze(chrome);
+          void 0; // no return
         }
-      },
+
+        try {
+          // Expose extension IPC to main world
+          electron__WEBPACK_IMPORTED_MODULE_0__.contextBridge.exposeInMainWorld('electron', electronContext);
+
+          // Mutate global 'chrome' object with additional APIs in the main world.
+          electron__WEBPACK_IMPORTED_MODULE_0__.webFrame.executeJavaScript(`(${mainWorldScript}());`);
+        } catch {
+          // contextBridge threw an error which means we're in the main world so we
+          // can just execute our function.
+          mainWorldScript();
+        }
+      };
+
+      /***/
+    }),
+
+    /***/ "electron":
+    /*!***************************!*\
+      !*** external "electron" ***!
+      \***************************/
+    /***/ ((module) => {
+
+      module.exports = require("electron");
+
+      /***/
+    })
+
+    /******/
+  });
+  /************************************************************************/
+  /******/ 	// The module cache
+  /******/
+  var __webpack_module_cache__ = {};
+  /******/
+  /******/ 	// The require function
+  /******/
+  function __webpack_require__(moduleId) {
+    /******/ 		// Check if module is in cache
+    /******/
+    var cachedModule = __webpack_module_cache__[moduleId];
+    /******/
+    if (cachedModule !== undefined) {
+      /******/
+      return cachedModule.exports;
+      /******/
+    }
+    /******/ 		// Create a new module (and put it into the cache)
+    /******/
+    var module = __webpack_module_cache__[moduleId] = {
+      /******/ 			// no module.id needed
+      /******/ 			// no module.loaded needed
+      /******/      exports: {}
+      /******/
     };
+    /******/
+    /******/ 		// Execute the module function
+    /******/
+    __webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+    /******/
+    /******/ 		// Return the exports of the module
+    /******/
+    return module.exports;
+    /******/
+  }
 
-    //Initialize APIs
-    Object.keys(apiDefinitions).forEach(key => {
-      const apiName = key;
-      const baseApi = chrome[apiName];
-      const api = apiDefinitions[apiName];
-
-      // Allow APIs to opt-out of being available in this context.
-      if (api.shouldInject && !api.shouldInject()) return;
-      try {
-        chrome[apiName] = api.factory(baseApi);
-        // Object.defineProperty(chrome, apiName, {
-        //   value: api.factory(baseApi),
-        //   enumerable: true,
-        //   configurable: true
-        // });
-      } catch (e) {
-        console.log("define error", e);
+  /******/
+  /************************************************************************/
+  /******/ 	/* webpack/runtime/compat get default export */
+  /******/
+  (() => {
+    /******/ 		// getDefaultExport function for compatibility with non-harmony modules
+    /******/
+    __webpack_require__.n = (module) => {
+      /******/
+      var getter = module && module.__esModule ?
+        /******/        () => (module['default']) :
+        /******/        () => (module);
+      /******/
+      __webpack_require__.d(getter, {a: getter});
+      /******/
+      return getter;
+      /******/
+    };
+    /******/
+  })();
+  /******/
+  /******/ 	/* webpack/runtime/define property getters */
+  /******/
+  (() => {
+    /******/ 		// define getter functions for harmony exports
+    /******/
+    __webpack_require__.d = (exports, definition) => {
+      /******/
+      for (var key in definition) {
+        /******/
+        if (__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+          /******/
+          Object.defineProperty(exports, key, {enumerable: true, get: definition[key]});
+          /******/
+        }
+        /******/
       }
-    });
-
-    // Remove access to internals
-    delete window.electron;
-    // Object.freeze(chrome);
-    void 0; // no return
-  }
-
-  try {
-    // Expose extension IPC to main world
-    electron__WEBPACK_IMPORTED_MODULE_0__.contextBridge.exposeInMainWorld('electron', electronContext);
-
-    // Mutate global 'chrome' object with additional APIs in the main world.
-    electron__WEBPACK_IMPORTED_MODULE_0__.webFrame.executeJavaScript(`(${mainWorldScript}());`);
-  } catch {
-    // contextBridge threw an error which means we're in the main world so we
-    // can just execute our function.
-    mainWorldScript();
-  }
-};
-
-/***/ }),
-
-/***/ "electron":
-/*!***************************!*\
-  !*** external "electron" ***!
-  \***************************/
-/***/ ((module) => {
-
-module.exports = require("electron");
-
-/***/ })
-
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/************************************************************************/
-var __webpack_exports__ = {};
+      /******/
+    };
+    /******/
+  })();
+  /******/
+  /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+  /******/
+  (() => {
+    /******/
+    __webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+    /******/
+  })();
+  /******/
+  /******/ 	/* webpack/runtime/make namespace object */
+  /******/
+  (() => {
+    /******/ 		// define __esModule on exports
+    /******/
+    __webpack_require__.r = (exports) => {
+      /******/
+      if (typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+        /******/
+        Object.defineProperty(exports, Symbol.toStringTag, {value: 'Module'});
+        /******/
+      }
+      /******/
+      Object.defineProperty(exports, '__esModule', {value: true});
+      /******/
+    };
+    /******/
+  })();
+  /******/
+  /************************************************************************/
+  var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
-/*!************************!*\
-  !*** ./src/preload.ts ***!
-  \************************/
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _renderer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./renderer */ "./src/renderer/index.ts");
+  (() => {
+    /*!************************!*\
+      !*** ./src/preload.ts ***!
+      \************************/
+    __webpack_require__.r(__webpack_exports__);
+    /* harmony import */
+    var _renderer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./renderer */ "./src/renderer/index.ts");
 
 
 // Only load within extension page context
-if (location.href.startsWith('chrome-extension://')) {
-  (0,_renderer__WEBPACK_IMPORTED_MODULE_0__.injectExtensionAPIs)();
-}
-})();
+    if (location.href.startsWith('chrome-extension://')) {
+      console.log("preload inject");
+      (0, _renderer__WEBPACK_IMPORTED_MODULE_0__.injectExtensionAPIs)();
+    }
+  })();
 
-/******/ })()
+  /******/
+})()
 ;
 //# sourceMappingURL=preload.js.map

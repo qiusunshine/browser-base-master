@@ -55,6 +55,8 @@ export class ITab {
   public url = '';
 
   public blockedAds: any[] = [];
+
+  public videoUrls: string[] = [];
   public filtersCount = 0;
 
   public hasCredentials = false;
@@ -92,6 +94,7 @@ export class ITab {
       isPlaying: observable,
       title: observable,
       blockedAds: observable,
+      videoUrls: observable,
       hasCredentials: observable,
       isSelected: computed,
       isHovered: computed,

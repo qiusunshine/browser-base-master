@@ -1,4 +1,4 @@
-import {BrowserWindow, app, dialog} from 'electron';
+import {BrowserWindow, app, dialog, ipcMain} from 'electron';
 import {writeFileSync, promises} from 'fs';
 import {resolve, join} from 'path';
 
@@ -7,6 +7,7 @@ import {runMessagingService} from '../services';
 import {Application} from '../application';
 import {isNightly} from '..';
 import {ViewManager} from '../view-manager';
+import {PopupView} from "~/main/dialogs/popup";
 
 export class AppWindow {
   public win: BrowserWindow;
@@ -14,6 +15,7 @@ export class AppWindow {
   public viewManager: ViewManager;
 
   public incognito: boolean;
+  public popup: PopupView;
 
   public constructor(incognito: boolean) {
     this.win = new BrowserWindow({
@@ -54,6 +56,31 @@ export class AppWindow {
 
     runMessagingService(this);
 
+    if (process.env.ENABLE_EXTENSIONS) {
+      ipcMain.on(`show-extension-popup-${this.id}`, (e, left, top, url, inspect, extensionId) => {
+        if (this.popup) {
+          const toggleExtension = !this.popup.isDestroyed() && this.popup.extensionId === extensionId
+          this.popup.destroy()
+          this.popup = undefined
+          if (toggleExtension) {
+            return
+          }
+        }
+        this.popup = new PopupView({
+          extensionId,
+          session: incognito ? Application.instance.sessions.viewIncognito : Application.instance.sessions.view,
+          parent: this.win,
+          url: url,
+          anchorRect: {
+            x: left,
+            y: top,
+            height: 0,
+            width: 0
+          }
+        })
+      });
+    }
+
     const windowDataPath = getPath('window-data.json');
 
     let windowState: any = {};
@@ -84,7 +111,7 @@ export class AppWindow {
       this.initWin(windowState, windowDataPath, incognito);
     })();
   }
-    
+
   public initWin = (windowState: any, windowDataPath: string, incognito: boolean) => {
     this.win.show();
     // Update window bounds on resize and on move when window is not maximized.
@@ -177,7 +204,7 @@ export class AppWindow {
       // 等初始化完成后再显示
       this.win.show();
     })
-    
+
 
     this.win.on('enter-full-screen', () => {
       this.send('fullscreen', true);

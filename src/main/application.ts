@@ -89,6 +89,7 @@ export class Application {
   }
 
   private async onReady() {
+    app.commandLine.appendSwitch('lang', 'zh-CN');
     await app.whenReady();
 
     new ExtensionServiceHandler();

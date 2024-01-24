@@ -1,6 +1,6 @@
 {
   "name": "wexond",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "sideEffects": false,
   "description": "Extensible, fast and innovative web browser with material UI.",
   "keywords": [

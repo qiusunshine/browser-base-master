@@ -122,22 +122,6 @@ export const QuickMenu = observer(() => {
             </RightControl>
           </MenuItem>
           <Line />
-          <MenuItem onClick={goToWebUIPage('newtab')}>
-            <Icon icon={ICON_TAB} />
-            <MenuItemTitle>打开新的标签页</MenuItemTitle>
-            <Shortcut>Ctrl+T</Shortcut>
-          </MenuItem>
-          <MenuItem onClick={onNewWindowClick}>
-            <Icon icon={ICON_WINDOW} />
-            <MenuItemTitle>打开新的窗口</MenuItemTitle>
-            <Shortcut>Ctrl+N</Shortcut>
-          </MenuItem>
-          <MenuItem onClick={onIncognitoClick}>
-            <Icon icon={ICON_INCOGNITO} />
-            <MenuItemTitle>打开新的匿名窗口</MenuItemTitle>
-            <Shortcut>Ctrl+Shift+N</Shortcut>
-          </MenuItem>
-          <Line />
           <MenuItem onClick={goToWebUIPage('history')} arrow>
             <Icon icon={ICON_HISTORY} />
             <MenuItemTitle>历史记录</MenuItemTitle>

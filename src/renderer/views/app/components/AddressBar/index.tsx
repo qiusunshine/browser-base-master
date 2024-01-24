@@ -90,7 +90,9 @@ const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 let addressbarRef: HTMLDivElement;
 
 const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  store.tabs.selectedTab.addressbarValue = e.currentTarget.value;
+  if(store.tabs.selectedTab) {
+    store.tabs.selectedTab.addressbarValue = e.currentTarget.value;
+  }
 
   const { left, width } = addressbarRef.getBoundingClientRect();
 

@@ -71,3 +71,4 @@ export const ICON_WEATHER_NIGHT_SHOWERS = require('~/renderer/resources/icons/we
 export const ICON_WEATHER_NIGHT_SNOW = require('~/renderer/resources/icons/weather/night/snow.png');
 export const ICON_WEATHER_NIGHT_STORM = require('~/renderer/resources/icons/weather/night/storm.png');
 export const ICON_HOME = require('~/renderer/resources/icons/home.svg');
+export const ICON_VIDEO = require('~/renderer/resources/icons/video.svg');

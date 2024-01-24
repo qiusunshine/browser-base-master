@@ -4,13 +4,12 @@ import AutoComplete from './models/auto-complete';
 import {getTheme} from '~/utils/themes';
 import {ERROR_PROTOCOL, WEBUI_BASE_URL} from '~/constants/files';
 import {injectChromeWebstoreInstallButton} from './chrome-webstore';
-import {call} from "animejs";
-
-const tabId = ipcRenderer.sendSync('get-webcontents-id');
+import {injectBrowserAction} from "electron-chrome-extensions/dist/browser-action";
 
 export const windowId: number = ipcRenderer.sendSync('get-window-id');
 
 const goBack = () => {
+  const tabId = ipcRenderer.sendSync('get-webcontents-id');
   ipcRenderer.invoke(`web-contents-call`, {
     webContentsId: tabId,
     method: 'goBack',
@@ -18,6 +17,7 @@ const goBack = () => {
 };
 
 const goForward = () => {
+  const tabId = ipcRenderer.sendSync('get-webcontents-id');
   ipcRenderer.invoke(`web-contents-call`, {
     webContentsId: tabId,
     method: 'goForward',
@@ -120,12 +120,12 @@ if (
   injectChromeWebstoreInstallButton();
 }
 
-const settings = ipcRenderer.sendSync('get-settings-sync');
 if (
   window.location.href.startsWith(WEBUI_BASE_URL) ||
   window.location.protocol === `${ERROR_PROTOCOL}:`
 ) {
   (async function () {
+    const settings = ipcRenderer.sendSync('get-settings-sync');
     const w = await webFrame.executeJavaScript('window');
     w.settings = settings;
     w.require = (id: string) => {
@@ -137,6 +137,7 @@ if (
 
     if (window.location.pathname.startsWith('//network-error')) {
       w.theme = getTheme(w.settings.theme);
+      const tabId = ipcRenderer.sendSync('get-webcontents-id');
       w.errorURL = await ipcRenderer.invoke(`get-error-url-${tabId}`);
     } else if (hostname.startsWith('history')) {
       w.getHistory = async () => {
@@ -153,6 +154,7 @@ if (
   })();
 } else {
   (async function () {
+    const settings = ipcRenderer.sendSync('get-settings-sync');
     if (settings.doNotTrack) {
       const w = await webFrame.executeJavaScript('window');
       Object.defineProperty(w.navigator, 'doNotTrack', {value: 1});
@@ -227,5 +229,15 @@ if (window.location.href.startsWith(WEBUI_BASE_URL)) {
       },
       '*',
     );
+  });
+} else {
+  window.addEventListener('message', async ({data}) => {
+    if (data.type === 'xiu-video-created') {
+      //console.log("xiu-video-created message", data);
+      const tabId = ipcRenderer.sendSync('get-webcontents-id');
+      ipcRenderer.send(`xiu-video-created-${tabId}`, {
+        url: data.src,
+      });
+    }
   });
 }

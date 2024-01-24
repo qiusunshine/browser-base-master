@@ -33,6 +33,7 @@ if (!chromeVersion) {
   chromeVersion = "120.0.0.0";
 }
 export const ChromeUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/" + chromeVersion + " Safari/537.36";
+export const ChromeAppVersion = "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/" + chromeVersion + " Safari/537.36";
 
 export const getUserAgentForURL = (userAgent: string, url: string) => {
   return ChromeUserAgent;

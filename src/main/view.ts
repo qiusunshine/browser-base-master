@@ -1,4 +1,4 @@
-import {BrowserView, app, ipcMain, session} from 'electron';
+import {BrowserView, app, ipcMain, session, webFrameMain, BrowserWindow} from 'electron';
 import {parse as parseUrl} from 'url';
 import {getViewMenu} from './menus/view';
 import {AppWindow} from './windows';
@@ -16,9 +16,9 @@ import {
 import {TabEvent} from '~/interfaces/tabs';
 import {Queue} from '~/utils/queue';
 import {Application} from './application';
-import {getUserAgentForURL} from './user-agent';
-import FrameCreatedDetails = Electron.FrameCreatedDetails;
+import {ChromeAppVersion, ChromeUserAgent, getUserAgentForURL} from './user-agent';
 import {getWebUIURL} from "~/common/webui-main";
+import {filterCount} from "~/main/services/adblock";
 
 interface IAuthInfo {
   url: string;
@@ -55,6 +55,8 @@ export class View {
   private historyQueue = new Queue();
 
   private lastUrl = '';
+  public videoUrls: string[] = [];
+  public framesCache: any[] = [];
 
   public constructor(window: AppWindow, url: string, incognito: boolean) {
     this.browserView = new BrowserView({
@@ -102,6 +104,112 @@ export class View {
     ipcMain.handle(`get-error-url-${this.id}`, async (e) => {
       return this.errorURL;
     });
+    ipcMain.on(`xiu-video-created-${this.id}`, async (e, data) => {
+      console.log("xiu-video-created", data);
+      if (!this.videoUrls.includes(data.url)) {
+        this.videoUrls.push(data.url);
+        this.emitEvent('xiu-video', this.videoUrls);
+      }
+    });
+
+    const getInjectJS = (method: string) => {
+      const find = `
+          function findLargestPlayingVideo() {
+            const videos = Array.from(document.querySelectorAll('video'))
+              .filter(video => video.readyState != 0)
+              .filter(video => video.disablePictureInPicture == false)
+              .sort((v1, v2) => {
+                const v1Rect = v1.getClientRects()[0]||{width:0,height:0};
+                const v2Rect = v2.getClientRects()[0]||{width:0,height:0};
+                return ((v2Rect.width * v2Rect.height) - (v1Rect.width * v1Rect.height));
+              });
+            if (videos.length === 0) {
+              return;
+            }
+            return videos[0];
+          }
+      `
+      if (method == "full") {
+        return `
+    (() => {
+          ${find}
+          (async () => {
+            const video = findLargestPlayingVideo();
+            if (!video) {
+              return;
+            }
+            if (video.requestFullscreen) {
+              video.requestFullscreen();
+            } else if (video.mozRequestFullScreen) {
+              video.mozRequestFullScreen();
+            } else if (video.webkitRequestFullscreen) {
+              video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) {
+              video.msRequestFullscreen();
+            }
+          })();
+    })();
+      `;
+      }
+      return `
+    (() => {
+          ${find}
+          async function requestPictureInPicture(video) {
+            await video.requestPictureInPicture();
+            video.setAttribute('__pip__', true);
+            video.addEventListener('leavepictureinpicture', event => {
+              video.removeAttribute('__pip__');
+            }, { once: true });
+            new ResizeObserver(maybeUpdatePictureInPictureVideo).observe(video);
+          }
+          function maybeUpdatePictureInPictureVideo(entries, observer) {
+            const observedVideo = entries[0].target;
+            if (!document.querySelector('[__pip__]')) {
+              observer.unobserve(observedVideo);
+              return;
+            }
+            const video = findLargestPlayingVideo();
+            if (video && !video.hasAttribute('__pip__')) {
+              observer.unobserve(observedVideo);
+              requestPictureInPicture(video);
+            }
+          }
+          (async () => {
+            const video = findLargestPlayingVideo();
+            if (!video) {
+              return;
+            }
+            if (video.hasAttribute('__pip__')) {
+              document.exitPictureInPicture();
+              return;
+            }
+            await requestPictureInPicture(video);
+          })();
+    })();
+      `;
+    };
+    ipcMain.on(`show-full-video-dialog-${this.id}`, async (e) => {
+      const inject = getInjectJS("full");
+      this.webContents.executeJavaScript(inject, true);
+      for (let item of this.framesCache) {
+        const {frameProcessId, frameRoutingId} = item;
+        const frame = webFrameMain.fromId(frameProcessId, frameRoutingId);
+        if (frame) {
+          frame.executeJavaScript(inject, true);
+        }
+      }
+    });
+    ipcMain.on(`show-float-video-dialog-${this.id}`, async (e) => {
+      const inject = getInjectJS("float");
+      this.webContents.executeJavaScript(inject, true);
+      for (let item of this.framesCache) {
+        const {frameProcessId, frameRoutingId} = item;
+        const frame = webFrameMain.fromId(frameProcessId, frameRoutingId);
+        if (frame) {
+          frame.executeJavaScript(inject, true);
+        }
+      }
+    });
 
     this.webContents.on('context-menu', (e, params) => {
       const menu = getViewMenu(this.window, params, this.webContents);
@@ -124,7 +232,8 @@ export class View {
 
     this.webContents.addListener('did-navigate', async (e, url) => {
       this.emitEvent('did-navigate', url);
-
+      this.videoUrls = [];
+      this.framesCache = [];
       await this.addHistoryItem(url);
       this.updateURL(url);
     });
@@ -141,6 +250,7 @@ export class View {
       },
     );
     this.webContents.setWindowOpenHandler((details) => {
+      console.log("setWindowOpenHandler", details);
       switch (details.disposition) {
         case 'foreground-tab':
         case 'background-tab':
@@ -149,7 +259,7 @@ export class View {
           // instead of BrowserWindows. For now, we're opting to break
           // window.open until a fix is available.
           // https://github.com/electron/electron/issues/33383
-          if(details.url != null && details.url != "" && details.url != "about:blank") {
+          if (details.url != null && details.url != "" && details.url != "about:blank") {
             queueMicrotask(() => {
               window.viewManager.create(
                 {
@@ -196,6 +306,71 @@ export class View {
         const newUA = getUserAgentForURL(this.webContents.userAgent, url);
         if (this.webContents.userAgent !== newUA) {
           this.webContents.userAgent = newUA;
+        }
+      },
+    );
+
+    const watch = `
+    (() => {
+        const urls = Array.from(document.getElementsByTagName('video')).map((video) => video.src);
+        //console.log(document.getElementsByTagName('video'));
+        //console.log(urls);
+        function getParentWindow00(w) {
+          // 如果当前窗口是最顶层窗口，则停止递归
+          if (w === w.parent) {
+            return w;
+          }
+          if(w.parent) {
+            return getParentWindow00(w.parent);
+          } else {
+            return w;
+          }
+        }
+        if(urls) {
+          for (let v of urls) {
+            v && getParentWindow00(window).postMessage({ type: 'xiu-video-created', src: v }, '*');
+          }
+        }
+        const observer = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+          if (mutation.type === 'childList') {
+            for (const addedNode of mutation.addedNodes) {
+              if (addedNode instanceof HTMLVideoElement) {
+                const src = addedNode.getAttribute('src');
+                getParentWindow00(window).postMessage({ type: 'xiu-video-created', src }, '*');
+              }
+            }
+          }
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    })();
+      `
+
+    this.webContents.on(
+      'did-finish-load',
+      () => {
+        this.webContents.executeJavaScript(`Object.defineProperty(navigator, 'userAgent', { value: '${ChromeUserAgent}' });Object.defineProperty(navigator, 'appVersion', { value: '${ChromeAppVersion}' })`);
+        this.webContents.executeJavaScript(watch, true);
+      },
+    );
+
+    this.webContents.on(
+      'did-frame-finish-load',
+      (event: Event,
+       isMainFrame: boolean,
+       frameProcessId: number,
+       frameRoutingId: number) => {
+        console.log("did-frame-finish-load", isMainFrame, frameProcessId, frameRoutingId);
+        if (!isMainFrame) {
+          const frame = webFrameMain.fromId(frameProcessId, frameRoutingId);
+          if (frame) {
+            this.framesCache.push({
+              frameProcessId, frameRoutingId
+            });
+            frame.executeJavaScript(`Object.defineProperty(navigator, 'userAgent', { value: '${ChromeUserAgent}' });Object.defineProperty(navigator, 'appVersion', { value: '${ChromeAppVersion}' })`);
+            frame.executeJavaScript(watch, true);
+          }
         }
       },
     );

@@ -7,7 +7,7 @@ import {
   ICON_KEY,
   ICON_MAGNIFY_PLUS,
   ICON_MAGNIFY_MINUS,
-  ICON_SHIELD,
+  ICON_SHIELD, ICON_VIDEO,
 } from '~/renderer/constants/icons';
 import {ipcRenderer} from 'electron';
 import * as remote from '@electron/remote';
@@ -51,6 +51,30 @@ const onBlockClick = (e: React.MouseEvent<HTMLDivElement>) => {
       filter: it.result
     })), count
   });
+};
+const onVideoClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const menu = remote.Menu.buildFromTemplate([
+    {
+      label: '全屏播放',
+      click: () => {
+        const {selectedTab} = store.tabs;
+        if (selectedTab) {
+          ipcRenderer.send(`show-full-video-dialog-${selectedTab.id}`);
+        }
+      },
+    },
+    {
+      label: '悬浮播放',
+      click: () => {
+        const {selectedTab} = store.tabs;
+        if (selectedTab) {
+          ipcRenderer.send(`show-float-video-dialog-${selectedTab.id}`);
+        }
+      },
+    },
+  ]);
+
+  menu.popup();
 };
 
 const onZoomClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -97,10 +121,12 @@ export const SiteButtons = observer(() => {
 
   let hasCredentials = false;
   let blockedAds = [];
+  let videoUrls = [];
 
   if (selectedTab) {
     hasCredentials = selectedTab.hasCredentials;
     blockedAds = selectedTab.blockedAds;
+    videoUrls = selectedTab.videoUrls;
   }
 
   const dense = !store.isCompact;
@@ -143,7 +169,18 @@ export const SiteButtons = observer(() => {
         opacity={store.settings.object.shield ? 0.87 : 0.54}
         onContextMenu={onShieldContextMenu}
         onClick={onBlockClick}
-      ></ToolbarButton>
+      />
+      {videoUrls.length > 0 && (
+        <ToolbarButton
+          id="video-btn"
+          size={16}
+          badge={videoUrls.length > 0}
+          badgeText={videoUrls.length.toString()}
+          icon={ICON_VIDEO}
+          opacity={0.87}
+          onClick={onVideoClick}
+        />
+      )}
     </>
   );
 });

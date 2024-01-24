@@ -101,16 +101,20 @@ export const runMessagingService = (appWindow: AppWindow) => {
   ipcMain.on(`show-block-dialog-${id}`, (e, left, top, data) => {
     showBlockDialog(appWindow.win, left, top, data);
   });
+
+  ipcMain.on(`show-block-dialog-${id}`, (e, left, top, data) => {
+    showBlockDialog(appWindow.win, left, top, data);
+  });
   ipcMain.on(`show-adblock-rule-${id}`, (event)=> {
     console.log("show-adblock-rule-");
     appWindow.win.webContents.send("show-adblock-rule");
   });
 
-  if (process.env.ENABLE_EXTENSIONS) {
-    ipcMain.on(`show-extension-popup-${id}`, (e, left, top, url, inspect) => {
-      showExtensionDialog(appWindow.win, left, top, url, inspect);
-    });
-  }
+  // if (process.env.ENABLE_EXTENSIONS) {
+  //   ipcMain.on(`show-extension-popup-${id}`, (e, left, top, url, inspect) => {
+  //     showExtensionDialog(appWindow.win, left, top, url, inspect);
+  //   });
+  // }
 
   ipcMain.on(`show-downloads-dialog-${id}`, (e, left, top) => {
     showDownloadsDialog(appWindow.win, left, top);

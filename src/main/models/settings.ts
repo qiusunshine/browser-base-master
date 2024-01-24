@@ -11,7 +11,7 @@ import {Application} from '../application';
 import {WEBUI_BASE_URL} from '~/constants/files';
 import {ISettings} from '~/interfaces';
 import {resolve} from "path";
-import {readFileAsText} from "~/utils/files";
+import {deletePath, pathExists, readFileAsText} from "~/utils/files";
 import {ChromeUserAgent} from "~/main/user-agent";
 import IpcMainEvent = Electron.IpcMainEvent;
 
@@ -61,6 +61,43 @@ export class Settings extends EventEmitter {
 
     nativeTheme.on('updated', () => {
       this.update();
+    });
+    ipcMain.handle('hiker-crx-msg', async (event, extensionId, fnName, ...args) => {
+      try {
+        const extensions = Application.instance.sessions.extensions;
+        const ext = (extensions || []).find(it => it.id == extensionId);
+        if (ext && ext.manifest && ext.manifest.commands) {
+          const commands = [];
+          for (let key of Object.keys(ext.manifest.commands)) {
+            commands.push({
+              name: key,
+              description: ext.manifest.commands[key].description,
+              shortcut: (ext.manifest.commands[key].suggested_key || {}).default
+            })
+          }
+          return commands;
+        }
+        const extensionsPath = getPath('extensions');
+        const path = resolve(extensionsPath, extensionId);
+        const manifestPath = resolve(path, 'manifest.json');
+        const manifest = JSON.parse(
+          await promises.readFile(manifestPath, 'utf8'),
+        );
+        if (manifest && manifest.commands) {
+          const commands = [];
+          for (let key of Object.keys(manifest.commands)) {
+            commands.push({
+              name: key,
+              description: manifest.commands[key].description,
+              shortcut: (manifest.commands[key].suggested_key || {}).default
+            })
+          }
+          return commands;
+        }
+      } catch (e) {
+        console.log(e);
+      }
+      return [];
     });
 
     // ipcMain.on('xiu-crx-add-listener', async (event: IpcMainEvent, extensionId, name, ...opts) => {
