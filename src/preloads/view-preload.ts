@@ -153,6 +153,10 @@ if (
         return await ipcRenderer.invoke(`topsites-get`, count);
       };
     }
+    if (window.location.href == "about:blank" && settings.doNotTrack) {
+      const w = await webFrame.executeJavaScript('window');
+      Object.defineProperty(w.navigator, 'doNotTrack', {value: 1});
+    }
   })();
 } else {
   (async function () {
@@ -233,10 +237,21 @@ if (window.location.href.startsWith(WEBUI_BASE_URL) ||
       '*',
     );
   });
+  if(window.location.href == "about:blank") {
+    window.addEventListener('message', async ({data}) => {
+      if (data.type === 'xiu-video-created') {
+        //console.log("xiu-video-created message", data);
+        const tabId = ipcRenderer.sendSync('get-webcontents-id');
+        ipcRenderer.send(`xiu-video-created-${tabId}`, {
+          url: data.src,
+        });
+      }
+    });
+  }
 } else {
   window.addEventListener('message', async ({data}) => {
     if (data.type === 'xiu-video-created') {
-      console.log("xiu-video-created message", data);
+      //console.log("xiu-video-created message", data);
       const tabId = ipcRenderer.sendSync('get-webcontents-id');
       ipcRenderer.send(`xiu-video-created-${tabId}`, {
         url: data.src,

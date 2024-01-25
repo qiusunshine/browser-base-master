@@ -163,11 +163,11 @@ export class View {
             }
         
             function hasBtnSize(item) {
-              if (item.clientWidth <= 0) {
-                return false;
-              }
-              if (item.clientHeight <= 0) {
-                return false;
+              if (item.clientWidth <= 0 || item.clientHeight <= 0) {
+                const styles = window.getComputedStyle(item);
+                const height = styles.getPropertyValue('height');
+                const width = styles.getPropertyValue('width');
+                return height != '0px' && width != '0px' && height != '0' && width != '0';
               }
               if (item.clientWidth > 100) {
                 return false;
@@ -179,7 +179,8 @@ export class View {
             }
         
             function findFullscreenNode(node) {
-              if (node.tagName == "VIDEO" || node.tagName == "LINK" || node.tagName == "SCRIPT") {
+              let tag = node.tagName.toLowerCase();
+              if (tag == "video" || tag == "link" || tag == "script" || tag == "use" || tag == "svg") {
                 return null;
               }
               let html = (node.outerHTML || "").toLowerCase();
@@ -200,7 +201,7 @@ export class View {
                 let nodes2 = [];
                 for (let item of childNodes) {
                   let html1 = (item.outerHTML || "").toLowerCase();
-                  if(html1.includes("网页全屏")) {
+                  if(html1.includes("网页全屏") || html1.includes("页面全屏")) {
                     nodes1.push(item);
                   } else {
                     nodes2.push(item);
@@ -226,6 +227,10 @@ export class View {
                 let count = 0;
                 let found;
                 while(count <= 5) {
+                  if(parent == null) {
+                    console.log('parent == null');
+                    return;
+                  }
                   for(let node of parent.children) {
                     if(node === now) {
                       continue;
@@ -524,6 +529,7 @@ export class View {
 
     const injectJS2 = `
         try {
+          console.log('injectJS2', location.href);
           if(typeof originalAddEventListener == 'undefined') {
             originalAddEventListener = EventTarget.prototype.addEventListener;
             let clickEventMap000 = new Map();
@@ -533,12 +539,12 @@ export class View {
               }
               originalAddEventListener.call(this, type, listener, options);
             };
-            window.hasClickEvent000 = function(element) {
+            hasClickEvent000 = function(element) {
               return clickEventMap000.has(element);
             };
           }
         } catch(e) {
-          console.log(e);
+          console.log('injectJS2', e);
         }
       `;
 
@@ -593,11 +599,11 @@ export class View {
               for (let v of urls) {
                 v && getParentWindow00(window).postMessage({ type: 'xiu-video-created', src: v }, '*');
               }
-            } else if(c < 3){
+            } else if(c < 10){
               c++;
               setTimeout(() => {
                 findVideos00(c);
-              }, 500);
+              }, c < 3 ? 500 : 1000);
             }
           } catch(e) {
             console.log(e);
@@ -666,11 +672,15 @@ export class View {
             } catch (e) {
               console.log("executeJavaScript", e);
             }
+            frame.executeJavaScript(injectJS2, true).catch(e => {
+              console.log("executeJavaScript", e);
+            });
           }
         }
       },
     );
     this.webContents.on('frame-created', (event, details) => {
+      console.log('frame-created', details.frame.url);
       details.frame.executeJavaScript(injectJS2, true);
     });
 
