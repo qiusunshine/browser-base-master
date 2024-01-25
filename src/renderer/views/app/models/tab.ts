@@ -1,5 +1,5 @@
-import { ipcRenderer } from 'electron';
-import { observable, computed, action, makeObservable } from 'mobx';
+import {ipcRenderer} from 'electron';
+import {observable, computed, action, makeObservable} from 'mobx';
 import * as React from 'react';
 
 import store from '../store';
@@ -10,9 +10,8 @@ import {
   TAB_MAX_WIDTH,
   TAB_PINNED_WIDTH,
 } from '../constants';
-import { closeWindow } from '../utils/windows';
-import { callViewMethod } from '~/utils/view';
-import { animateTab } from '../utils/tabs';
+import {callViewMethod} from '~/utils/view';
+import {animateTab} from '../utils/tabs';
 import {getWebUIURL} from "~/common/webui";
 
 export class ITab {
@@ -79,7 +78,7 @@ export class ITab {
   }
 
   public constructor(
-    { active, url, pinned }: chrome.tabs.CreateProperties,
+    {active, url, pinned}: chrome.tabs.CreateProperties,
     id: number,
   ) {
     makeObservable(this, {
@@ -117,7 +116,7 @@ export class ITab {
     }
 
     if (process.env.ENABLE_EXTENSIONS) {
-      const { defaultBrowserActions } = store.extensions;
+      const {defaultBrowserActions} = store.extensions;
 
       for (const item of defaultBrowserActions) {
         store.extensions.addBrowserActionToTab(this.id, item);
@@ -187,7 +186,7 @@ export class ITab {
 
     const width =
       (containerWidth - pinnedTabs * (TAB_PINNED_WIDTH + TABS_PADDING)) /
-        realTabsLength -
+      realTabsLength -
       TABS_PADDING -
       store.tabs.leftMargins / realTabsLength;
 
@@ -285,16 +284,16 @@ export class ITab {
     if (selected) {
       index = store.tabs.list.indexOf(this);
 
-      if (
+      if (index - 1 >= 0 && !store.tabs.list[index - 1].isClosing) {
+        const prevTab = store.tabs.list[index - 1];
+        prevTab.select();
+      } else if (
         index + 1 < store.tabs.list.length &&
         !store.tabs.list[index + 1].isClosing &&
         !store.tabs.scrollable
       ) {
         const nextTab = store.tabs.list[index + 1];
         nextTab.select();
-      } else if (index - 1 >= 0 && !store.tabs.list[index - 1].isClosing) {
-        const prevTab = store.tabs.list[index - 1];
-        prevTab.select();
       }
     }
 

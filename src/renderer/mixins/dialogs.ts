@@ -31,7 +31,7 @@ export const DialogStyle = styled(DialogBaseStyle)`
     }
   }
 
-  animation: 0.1s ease-out 0s 1 fadeIn;
+  animation: 0.15s ease-out 0s 1 fadeIn;
 `;
 
 export const PersistentDialogStyle = styled(DialogBaseStyle)`

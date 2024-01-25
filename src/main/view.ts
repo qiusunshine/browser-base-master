@@ -1,4 +1,4 @@
-import {BrowserView, app, ipcMain, session, webFrameMain, BrowserWindow, dialog} from 'electron';
+import {BrowserView, app, ipcMain, webFrameMain, dialog} from 'electron';
 import {parse as parseUrl} from 'url';
 import {getViewMenu} from './menus/view';
 import {AppWindow} from './windows';
@@ -18,7 +18,6 @@ import {Queue} from '~/utils/queue';
 import {Application} from './application';
 import {ChromeAppVersion, ChromeUserAgent, getUserAgentForURL} from './user-agent';
 import {getWebUIURL} from "~/common/webui-main";
-import {filterCount} from "~/main/services/adblock";
 import {VideoRequest} from "~/main/services/xiu-video";
 import {exec} from "child_process";
 import {existsSync} from "fs";
@@ -64,10 +63,12 @@ export class View {
   public framesCache: any[] = [];
 
   public constructor(window: AppWindow, url: string, incognito: boolean) {
+    const preload = `${app.getAppPath()}/build/view-preload.bundle.js`;
+    console.log(preload);
     this.browserView = new BrowserView({
       webPreferences: {
         session: incognito ? Application.instance.sessions.viewIncognito : Application.instance.sessions.view,
-        preload: `${app.getAppPath()}/build/view-preload.bundle.js`,
+        preload: preload,
         nodeIntegration: false,
         nodeIntegrationInWorker: false,
         nodeIntegrationInSubFrames: false,
@@ -119,7 +120,7 @@ export class View {
           function findLargestPlayingVideo() {
             const videos = Array.from(document.querySelectorAll('video'))
               .filter(video => video.readyState != 0)
-              .filter(video => video.disablePictureInPicture == false)
+              // .filter(video => video.disablePictureInPicture == false)
               .sort((v1, v2) => {
                 const v1Rect = v1.getClientRects()[0]||{width:0,height:0};
                 const v2Rect = v2.getClientRects()[0]||{width:0,height:0};
@@ -131,7 +132,7 @@ export class View {
             return videos[0];
           }
       `;
-      if(method == "other") {
+      if (method == "other") {
         return `
         (() => {
               ${find}
@@ -158,7 +159,7 @@ export class View {
               if (item.onclick) {
                 return true;
               }
-              return hasClickEvent000(item);
+              return typeof hasClickEvent000 != 'undefined' && hasClickEvent000(item);
             }
         
             function hasBtnSize(item) {
@@ -187,11 +188,29 @@ export class View {
               }
               let arr1 = Array.from(node.children || []);
               if(arr1.length > 0) {
+                let childNodes = [];
                 for (let item of arr1) {
                   let child = findFullscreenNode(item);
                   if(child) {
-                    return child;
+                    childNodes.push(child);
                   }
+                }
+                //筛选一下
+                let nodes1 = [];
+                let nodes2 = [];
+                for (let item of childNodes) {
+                  let html1 = (item.outerHTML || "").toLowerCase();
+                  if(html1.includes("网页全屏")) {
+                    nodes1.push(item);
+                  } else {
+                    nodes2.push(item);
+                  }
+                }
+                if(nodes2.length > 0) {
+                  return nodes2[0];
+                }
+                if(nodes1.length > 0) {
+                  return nodes1[0];
                 }
               } 
               if(hasBtnSize(node) && hasClick(node)) {
@@ -352,7 +371,7 @@ export class View {
             && !it.startsWith("User-Agent")
             && !it.toLowerCase().startsWith("sec-"))
           .join("\r\n");
-        if(hd) {
+        if (hd) {
           hd = ` /headers="${hd}"`;
         }
         console.log("headers", hd);
@@ -553,9 +572,6 @@ export class View {
 
     const watch = `
     (() => {
-        const urls = Array.from(document.getElementsByTagName('video')).map((video) => video.src);
-        //console.log(document.getElementsByTagName('video'));
-        //console.log(urls);
         function getParentWindow00(w) {
           // 如果当前窗口是最顶层窗口，则停止递归
           if (w === w.parent) {
@@ -567,32 +583,59 @@ export class View {
             return w;
           }
         }
-        if(urls) {
-          for (let v of urls) {
-            v && getParentWindow00(window).postMessage({ type: 'xiu-video-created', src: v }, '*');
+        function findVideos00(c) {
+          try {
+            const urls = Array.from(document.getElementsByTagName('video'))
+            .filter(video => video && video.src).map((video) => video.src);
+            //console.log(‘video’, document.getElementsByTagName('video'));
+            //console.log(urls);
+            if(urls && urls.length > 0) {
+              for (let v of urls) {
+                v && getParentWindow00(window).postMessage({ type: 'xiu-video-created', src: v }, '*');
+              }
+            } else if(c < 3){
+              c++;
+              setTimeout(() => {
+                findVideos00(c);
+              }, 500);
+            }
+          } catch(e) {
+            console.log(e);
           }
         }
+        findVideos00(0);
         const observer = new MutationObserver((mutationsList) => {
         for (const mutation of mutationsList) {
           if (mutation.type === 'childList') {
             for (const addedNode of mutation.addedNodes) {
               if (addedNode instanceof HTMLVideoElement) {
                 const src = addedNode.getAttribute('src');
-                getParentWindow00(window).postMessage({ type: 'xiu-video-created', src }, '*');
+                if(src) {
+                  getParentWindow00(window).postMessage({ type: 'xiu-video-created', src }, '*');
+                }
               }
             }
           }
         }
       });
-      observer.observe(document.body, { childList: true, subtree: true });
-    })();
+      if(document.body) observer.observe(document.body, { childList: true, subtree: true });
+    })();true
       `
 
     this.webContents.on(
       'did-finish-load',
       () => {
-        this.webContents.executeJavaScript(`Object.defineProperty(navigator, 'userAgent', { value: '${ChromeUserAgent}' });Object.defineProperty(navigator, 'appVersion', { value: '${ChromeAppVersion}' })`);
-        this.webContents.executeJavaScript(watch, true);
+        const pageUrl = this.webContents.getURL();
+        if (pageUrl && pageUrl.startsWith("http://localhost:") || pageUrl.startsWith("file://") || pageUrl.startsWith("wexond://")) {
+          return
+        }
+        this.webContents.executeJavaScript(`Object.defineProperty(navigator, 'userAgent', { value: '${ChromeUserAgent}' });Object.defineProperty(navigator, 'appVersion', { value: '${ChromeAppVersion}' });true`)
+          .catch(e => {
+            console.log("executeJavaScript1", e);
+          });
+        this.webContents.executeJavaScript(watch, true).catch(e => {
+          console.log("executeJavaScript2", e);
+        });
       },
     );
 
@@ -609,8 +652,20 @@ export class View {
             this.framesCache.push({
               frameProcessId, frameRoutingId
             });
-            frame.executeJavaScript(`Object.defineProperty(navigator, 'userAgent', { value: '${ChromeUserAgent}' });Object.defineProperty(navigator, 'appVersion', { value: '${ChromeAppVersion}' })`);
-            frame.executeJavaScript(watch, true);
+            try {
+              frame.executeJavaScript(`Object.defineProperty(navigator, 'userAgent', { value: '${ChromeUserAgent}' });Object.defineProperty(navigator, 'appVersion', { value: '${ChromeAppVersion}' });true`).catch(e => {
+                console.log("executeJavaScript1", e);
+              });
+            } catch (e) {
+              console.log("executeJavaScript2", e);
+            }
+            try {
+              frame.executeJavaScript(watch, true).catch(e => {
+                console.log("executeJavaScript", e);
+              });
+            } catch (e) {
+              console.log("executeJavaScript", e);
+            }
           }
         }
       },
@@ -731,6 +786,7 @@ export class View {
 
     if (url.startsWith(getWebUIURL("newtab"))) this.isNewTab = true;
 
+    //console.log("view init", url);
     this.webContents.loadURL(url);
 
     this.browserView.setAutoResize({

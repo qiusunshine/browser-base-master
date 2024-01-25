@@ -5,7 +5,6 @@ import store from '../../store';
 import { ThemeProvider } from 'styled-components';
 import { Wrapper, Content, IconItem, Menu, Image, RightBar } from './style';
 import { TopSites } from '../TopSites';
-import { News } from '../News';
 import { Preferences } from '../Preferences';
 import {
   ICON_TUNE,
@@ -13,8 +12,6 @@ import {
   ICON_HISTORY,
   ICON_BOOKMARKS,
   ICON_FIRE,
-  ICON_DOWNLOAD,
-  ICON_EXTENSIONS,
 } from '~/renderer/constants/icons';
 import { WebUIStyle } from '~/renderer/mixins/default-styles';
 import { getWebUIURL } from '~/common/webui';

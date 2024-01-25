@@ -74,7 +74,7 @@ export class DialogsService {
     });
     require("@electron/remote/main").enable(view.webContents);
 
-    //view.webContents.loadURL(`about:blank`);
+    view.webContents.loadURL(`about:blank`);
 
     this.browserViews.push(view);
 

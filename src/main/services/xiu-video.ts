@@ -33,7 +33,7 @@ export const filterVideo = (details: OnHeadersReceivedListenerDetails) => {
         frameUrl: (frame || {}).url,
         requestHeaders: view.requestRecord.get(url)
       };
-      console.log(url, referrer, request.requestHeaders);
+      //console.log(url, referrer, request.requestHeaders);
       view.addNetVideoRequest(request);
     }
   }

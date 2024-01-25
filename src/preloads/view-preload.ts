@@ -4,12 +4,12 @@ import AutoComplete from './models/auto-complete';
 import {getTheme} from '~/utils/themes';
 import {ERROR_PROTOCOL, WEBUI_BASE_URL} from '~/constants/files';
 import {injectChromeWebstoreInstallButton} from './chrome-webstore';
-import {injectBrowserAction} from "electron-chrome-extensions/dist/browser-action";
+
+const tabId = ipcRenderer.sendSync('get-webcontents-id');
 
 export const windowId: number = ipcRenderer.sendSync('get-window-id');
 
 const goBack = () => {
-  const tabId = ipcRenderer.sendSync('get-webcontents-id');
   ipcRenderer.invoke(`web-contents-call`, {
     webContentsId: tabId,
     method: 'goBack',
@@ -17,7 +17,6 @@ const goBack = () => {
 };
 
 const goForward = () => {
-  const tabId = ipcRenderer.sendSync('get-webcontents-id');
   ipcRenderer.invoke(`web-contents-call`, {
     webContentsId: tabId,
     method: 'goForward',
@@ -111,7 +110,7 @@ const postMsg = (data: any, res: any) => {
   );
 };
 
-const hostname = window.location.href.substr(WEBUI_BASE_URL.length);
+let hostname = window.location.href.substr(WEBUI_BASE_URL.length);
 
 if (
   process.env.ENABLE_EXTENSIONS &&
@@ -120,12 +119,17 @@ if (
   injectChromeWebstoreInstallButton();
 }
 
+const settings = ipcRenderer.sendSync('get-settings-sync');
+//console.log("preload", window.location.href, hostname);
+if (window.location.href == "about:blank") {
+  hostname = "newtab";
+}
 if (
   window.location.href.startsWith(WEBUI_BASE_URL) ||
-  window.location.protocol === `${ERROR_PROTOCOL}:`
+  window.location.protocol === `${ERROR_PROTOCOL}:` ||
+  window.location.href == "about:blank"
 ) {
   (async function () {
-    const settings = ipcRenderer.sendSync('get-settings-sync');
     const w = await webFrame.executeJavaScript('window');
     w.settings = settings;
     w.require = (id: string) => {
@@ -137,16 +141,14 @@ if (
 
     if (window.location.pathname.startsWith('//network-error')) {
       w.theme = getTheme(w.settings.theme);
-      const tabId = ipcRenderer.sendSync('get-webcontents-id');
       w.errorURL = await ipcRenderer.invoke(`get-error-url-${tabId}`);
-    } else if (hostname.startsWith('history')) {
+    } else {
       w.getHistory = async () => {
         return await ipcRenderer.invoke(`history-get`);
       };
       w.removeHistory = (ids: string[]) => {
         ipcRenderer.send(`history-remove`, ids);
       };
-    } else if (hostname.startsWith('newtab')) {
       w.getTopSites = async (count: number) => {
         return await ipcRenderer.invoke(`topsites-get`, count);
       };
@@ -154,7 +156,6 @@ if (
   })();
 } else {
   (async function () {
-    const settings = ipcRenderer.sendSync('get-settings-sync');
     if (settings.doNotTrack) {
       const w = await webFrame.executeJavaScript('window');
       Object.defineProperty(w.navigator, 'doNotTrack', {value: 1});
@@ -162,8 +163,10 @@ if (
   })();
 }
 
-if (window.location.href.startsWith(WEBUI_BASE_URL)) {
+if (window.location.href.startsWith(WEBUI_BASE_URL) ||
+  window.location.href == "about:blank") {
   window.addEventListener('DOMContentLoaded', () => {
+    hostname = window.location.href.substr(WEBUI_BASE_URL.length);
     if (hostname.startsWith('settings')) document.title = '设置';
     else if (hostname.startsWith('history')) document.title = '历史记录';
     else if (hostname.startsWith('bookmarks')) document.title = '书签';
@@ -233,7 +236,7 @@ if (window.location.href.startsWith(WEBUI_BASE_URL)) {
 } else {
   window.addEventListener('message', async ({data}) => {
     if (data.type === 'xiu-video-created') {
-      //console.log("xiu-video-created message", data);
+      console.log("xiu-video-created message", data);
       const tabId = ipcRenderer.sendSync('get-webcontents-id');
       ipcRenderer.send(`xiu-video-created-${tabId}`, {
         url: data.src,

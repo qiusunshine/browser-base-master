@@ -2,7 +2,6 @@ import { ipcRenderer } from 'electron';
 
 import { Form } from './form';
 import { searchElements } from '../utils';
-import { IFormFillData } from '~/interfaces';
 import { windowId } from '../view-preload';
 
 export class AutoComplete {
@@ -34,10 +33,14 @@ export class AutoComplete {
   }
 
   public loadForms = () => {
-    const forms = searchElements(document, 'form') as HTMLFormElement[];
-    //console.log("forms", forms);
+    try {
+      const forms = searchElements(document, 'form') as HTMLFormElement[];
+      //console.log("forms", forms);
 
-    this.forms = forms.map((el) => new Form(el));
+      this.forms = forms.map((el) => new Form(el));
+    } catch (e) {
+      
+    }
   };
 
   public onWindowMouseDown = () => {
