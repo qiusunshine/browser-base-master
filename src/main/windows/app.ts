@@ -113,7 +113,7 @@ export class AppWindow {
   }
 
   public initWin = (windowState: any, windowDataPath: string, incognito: boolean) => {
-    this.win.show();
+    //this.win.show();
     // Update window bounds on resize and on move when window is not maximized.
     this.win.on('resize', () => {
       if (!this.win.isMaximized()) {
@@ -198,12 +198,13 @@ export class AppWindow {
       this.webContents.openDevTools({mode: 'detach'});
       this.win.loadURL('http://localhost:4444/app.html');
     } else {
+      //this.webContents.openDevTools({mode: 'detach'});
       this.win.loadURL(join('file://', app.getAppPath(), 'build/app.html'));
     }
     this.win.on('ready-to-show', () => {
       // 等初始化完成后再显示
       this.win.show();
-    })
+    });
 
 
     this.win.on('enter-full-screen', () => {

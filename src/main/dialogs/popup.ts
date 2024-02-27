@@ -1,4 +1,4 @@
-import { BrowserWindow, Session } from 'electron'
+import {BrowserWindow, ipcRenderer, Session} from 'electron'
 import {getViewMenu} from "~/main/menus/extension-popup";
 import {Application} from "~/main/application";
 
@@ -191,25 +191,49 @@ export class PopupView {
   whenReady() {
     return this.readyPromise
   }
+  
+  lastWidth = -1;
+  lastHeight = -1;
+  lastWidthChange = false;
+  lastHeightChange = false;
 
   setSize(rect: Partial<Electron.Rectangle>) {
     if (!this.browserWindow || !this.parent) return
 
-    const width = Math.floor(
+    let width = Math.floor(
       Math.min(PopupView.BOUNDS.maxWidth, Math.max(rect.width || 0, PopupView.BOUNDS.minWidth))
     )
 
-    const height = Math.floor(
+    let height = Math.floor(
       Math.min(PopupView.BOUNDS.maxHeight, Math.max(rect.height || 0, PopupView.BOUNDS.minHeight))
     )
 
-    debug(`setSize`, { width, height })
-
-    this.browserWindow?.setBounds({
-      ...this.browserWindow.getBounds(),
-      width,
-      height,
-    })
+    debug(`setSize`, { width, height });
+    let widthChange = this.lastWidth != width;
+    let heightChange = this.lastHeight != height;
+    const changeNow = () => {
+      this.lastHeight = height;
+      this.lastWidth = width;
+      this.browserWindow?.setBounds({
+        ...this.browserWindow.getBounds(),
+        width,
+        height,
+      })
+    }
+    //防抖动
+    if (widthChange && heightChange) {
+      changeNow();
+    } else if (widthChange) {
+      if (this.lastHeightChange) {
+        changeNow();
+      }
+    } else if (heightChange) {
+      if (this.lastWidthChange) {
+        changeNow();
+      }
+    }
+    this.lastWidthChange = widthChange;
+    this.lastHeightChange = heightChange;
   }
 
   private maybeClose = () => {

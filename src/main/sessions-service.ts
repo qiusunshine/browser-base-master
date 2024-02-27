@@ -13,7 +13,6 @@ import {
 import {getCrxIdByKey, parseCrx} from '~/utils/crx';
 import {pathExists, deletePath} from '~/utils/files';
 import {extractZip} from '~/utils/zip';
-import {extensions, _setFallbackSession} from 'electron-extensions';
 import {requestPermission} from './dialogs/permissions';
 import * as rimraf from 'rimraf';
 import {promisify} from 'util';

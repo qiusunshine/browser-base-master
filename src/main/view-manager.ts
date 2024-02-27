@@ -1,17 +1,16 @@
-import { ipcMain } from 'electron';
-import { VIEW_Y_OFFSET } from '~/constants/design';
-import { View } from './view';
-import { AppWindow } from './windows';
-import { WEBUI_BASE_URL } from '~/constants/files';
+import {ipcMain} from 'electron';
+import {VIEW_Y_OFFSET} from '~/constants/design';
+import {View} from './view';
+import {AppWindow} from './windows';
+import {WEBUI_BASE_URL} from '~/constants/files';
 
 import {
   ZOOM_FACTOR_MIN,
   ZOOM_FACTOR_MAX,
   ZOOM_FACTOR_INCREMENT,
 } from '~/constants/web-contents';
-import { extensions } from 'electron-extensions';
-import { EventEmitter } from 'events';
-import { Application } from './application';
+import {EventEmitter} from 'events';
+import {Application} from './application';
 
 export class ViewManager extends EventEmitter {
   public views = new Map<number, View>();
@@ -25,7 +24,7 @@ export class ViewManager extends EventEmitter {
   public get fullscreen() {
     return this._fullscreen;
   }
-  
+
   public getById(id: number) {
     return this.views.get(id);
   }
@@ -41,7 +40,7 @@ export class ViewManager extends EventEmitter {
     this.window = window;
     this.incognito = incognito;
 
-    const { id } = window.win;
+    const {id} = window.win;
     ipcMain.handle(`view-create-${id}`, (e, details) => {
       return this.create(details, false, false).id;
     });
@@ -113,24 +112,24 @@ export class ViewManager extends EventEmitter {
 
   public changeZoom(zoomDirection: 'in' | 'out', e?: any) {
     const newZoomFactor =
-        this.selected.webContents.zoomFactor +
-        (zoomDirection === 'in'
-          ? ZOOM_FACTOR_INCREMENT
-          : -ZOOM_FACTOR_INCREMENT);
+      this.selected.webContents.zoomFactor +
+      (zoomDirection === 'in'
+        ? ZOOM_FACTOR_INCREMENT
+        : -ZOOM_FACTOR_INCREMENT);
 
-      if (
-        newZoomFactor <= ZOOM_FACTOR_MAX &&
-        newZoomFactor >= ZOOM_FACTOR_MIN
-      ) {
-        this.selected.webContents.zoomFactor = newZoomFactor;
-        this.selected.emitEvent(
-          'zoom-updated',
-          this.selected.webContents.zoomFactor,
-        );
-      } else {
-        e?.preventDefault();
-      }
-      this.emitZoomUpdate();
+    if (
+      newZoomFactor <= ZOOM_FACTOR_MAX &&
+      newZoomFactor >= ZOOM_FACTOR_MIN
+    ) {
+      this.selected.webContents.zoomFactor = newZoomFactor;
+      this.selected.emitEvent(
+        'zoom-updated',
+        this.selected.webContents.zoomFactor,
+      );
+    } else {
+      e?.preventDefault();
+    }
+    this.emitZoomUpdate();
   }
 
   public get selected() {
@@ -142,8 +141,8 @@ export class ViewManager extends EventEmitter {
       r.url.startsWith(`${WEBUI_BASE_URL}settings`),
     );
   }
-  
-  public findByKey (key: string): View {
+
+  public findByKey(key: string): View {
     return Object.values(this.views).find((r) =>
       r.url.includes(`${key}`),
     );
@@ -156,8 +155,8 @@ export class ViewManager extends EventEmitter {
   ) {
     const view = new View(this.window, details.url, this.incognito);
 
-    const { webContents } = view.browserView;
-    const { id } = view;
+    const {webContents} = view.browserView;
+    const {id} = view;
 
     this.views.set(id, view);
 
@@ -170,11 +169,11 @@ export class ViewManager extends EventEmitter {
     });
 
     if (sendMessage) {
-      this.window.send('create-tab', { ...details }, isNext, id);
+      this.window.send('create-tab', {...details}, isNext, id);
     }
     return view;
   }
-  
+
   public removeByTabId(id: number) {
     this.window.send('remove-tab', id);
   }
@@ -185,7 +184,7 @@ export class ViewManager extends EventEmitter {
   }
 
   public select(id: number, focus = true, callExtension = false) {
-    const { selected } = this;
+    const {selected} = this;
     const view = this.views.get(id);
 
     if (!view) {
@@ -215,24 +214,40 @@ export class ViewManager extends EventEmitter {
     view.updateNavigationState();
 
     this.emit('activated', id);
-    if(callExtension) {
+    if (callExtension) {
       Application.instance.sessions.chromeExtensions.selectTab(view.webContents);
     }
 
     // TODO: this.emitZoomUpdate(false);
   }
 
+
+  private timer: any = null;
   public async fixBounds() {
+    return this.fixBounds0(0);
+  }
+  public async fixBounds0(count: number) {
     const view = this.selected;
 
     if (!view) return;
+    try {
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
+    } catch (e) {
+    }
 
-    const { width, height } = this.window.win.getContentBounds();
+    const {width, height} = this.window.win.getContentBounds();
 
     const toolbarContentHeight = await this.window.win.webContents
       .executeJavaScript(`
       document.getElementById('app').offsetHeight
     `);
+    if (toolbarContentHeight <= 0 && count < 40) {
+      this.timer = setTimeout(() => {
+        this.fixBounds0(count + 1);
+      }, 25);
+    }
 
     const newBounds = {
       x: 0,
@@ -242,6 +257,7 @@ export class ViewManager extends EventEmitter {
     };
 
     if (newBounds !== view.bounds) {
+      console.log("fixBounds", toolbarContentHeight, width, height);
       view.browserView.setBounds(newBounds);
       view.bounds = newBounds;
     }
@@ -282,9 +298,9 @@ export class ViewManager extends EventEmitter {
     Application.instance.dialogs
       .getDynamic('zoom')
       ?.browserView?.webContents?.send(
-        'zoom-factor-updated',
-        this.selected.webContents.zoomFactor,
-      );
+      'zoom-factor-updated',
+      this.selected.webContents.zoomFactor,
+    );
 
     this.window.webContents.send(
       'zoom-factor-updated',

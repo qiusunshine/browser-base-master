@@ -309,13 +309,15 @@ export class TabsStore {
 
   @action
   public async addTabs(options: chrome.tabs.CreateProperties[]) {
-    ipcRenderer.send(`hide-window-${store.windowId}`);
-
-    for (let i = 0; i < options.length; i++) {
-      if (i === options.length - 1) {
-        options[i].active = true;
-      } else {
-        options[i].active = false;
+    //ipcRenderer.send(`hide-window-${store.windowId}`);
+    let activeCount = options.filter(it => it.active).length;
+    if(activeCount != 1) {
+      for (let i = 0; i < options.length; i++) {
+        if (i === options.length - 1) {
+          options[i].active = true;
+        } else {
+          options[i].active = false;
+        }
       }
     }
 

@@ -1,5 +1,4 @@
 import { AppWindow } from './windows/app';
-import { extensions } from 'electron-extensions';
 import { BrowserWindow, ipcMain } from 'electron';
 
 export class WindowsService {

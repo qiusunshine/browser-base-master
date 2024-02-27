@@ -1,6 +1,6 @@
 {
   "name": "wexond",
-  "version": "1.0.5",
+  "version": "1.1.2",
   "sideEffects": false,
   "description": "Extensible, fast and innovative web browser with material UI.",
   "keywords": [
@@ -64,10 +64,9 @@
     "copy-webpack-plugin": "^9.0.1",
     "cross-env": "7.0.3",
     "cross-fetch": "^4.0.0",
-    "electron": "^28.1.4",
+    "electron": "^28.2.4",
     "electron-builder": "22.11.7",
     "electron-chrome-extensions": "^3.10.1",
-    "electron-extensions": "^7.0.0-beta.3",
     "eslint": "^7.29.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",

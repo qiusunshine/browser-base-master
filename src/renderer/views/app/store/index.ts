@@ -75,6 +75,7 @@ export class Store {
   public isBookmarked = false;
 
   public zoomFactor = 1;
+  public mouseUpped = false;
 
   public dialogsVisibility: { [key: string]: boolean } = {
     menu: false,
@@ -275,6 +276,7 @@ export class Store {
 
     ipcRenderer.on(`addressbar-update-input`, (e, data) => {
       const tab = this.tabs.getTabById(data.id);
+      //console.log(`addressbar-update-input`, data, tab, tab.isSelected);
 
       this.addressbarEditing = false;
 
@@ -292,6 +294,24 @@ export class Store {
           if (data.focus) {
             remote.getCurrentWebContents().focus();
             this.inputRef.focus();
+          } else if(data.enter) {
+            this.mouseUpped = false;
+            const blurNow = () => {
+              this.inputRef.blur();
+              window.getSelection().removeAllRanges();
+              this.addressbarTextVisible = true;
+              this.addressbarFocused = false;
+              const {selectedTab} = this.tabs;
+              if (selectedTab) {
+                selectedTab.addressbarFocused = false;
+              }
+            }
+            setTimeout(()=>{
+              blurNow();
+            }, 500);
+            setTimeout(()=>{
+              blurNow();
+            }, 1000);
           }
 
           if (data.escape) {

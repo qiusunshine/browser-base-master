@@ -111,13 +111,14 @@ const postMsg = (data: any, res: any) => {
 };
 
 let hostname = window.location.href.substr(WEBUI_BASE_URL.length);
-
-if (
-  process.env.ENABLE_EXTENSIONS &&
-  window.location.href.startsWith("https://microsoftedge.microsoft.com/addons")
-) {
-  injectChromeWebstoreInstallButton();
-}
+window.addEventListener('DOMContentLoaded', () => {
+  if (
+    process.env.ENABLE_EXTENSIONS &&
+    window.location.href.startsWith("https://microsoftedge.microsoft.com/addons")
+  ) {
+    injectChromeWebstoreInstallButton();
+  }
+});
 
 const settings = ipcRenderer.sendSync('get-settings-sync');
 //console.log("preload", window.location.href, hostname);
@@ -138,6 +139,7 @@ if (
       }
       return undefined;
     };
+    w['xiu-app-version'] = process.env.VERSION_CODE;
 
     if (window.location.pathname.startsWith('//network-error')) {
       w.theme = getTheme(w.settings.theme);

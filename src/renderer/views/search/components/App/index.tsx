@@ -37,7 +37,7 @@ const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
     callViewMethod(store.tabId, 'loadURL', url);
 
-    store.hide();
+    store.hide({enter: true});
   }
 };
 

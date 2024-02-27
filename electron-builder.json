@@ -2,48 +2,81 @@
   "appId": "org.hiker.xiu",
   "productName": "嗅觉",
   "nsis": {
-    "include": "static/installer.nsh",
-    "installerLanguages": ["zh_CN"]
+    "installerLanguages": [
+      "zh_CN"
+    ],
+    "oneClick": false,
+    "allowElevation": true,
+    "allowToChangeInstallationDirectory": true,
+    "installerIcon": "./static/icons/icon.ico",
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "嗅觉"
   },
-  "electronVersion": "28.1.4",
+  "electronVersion": "28.2.4",
   "generateUpdatesFilesForAllChannels": true,
   "asar": false,
   "directories": {
     "output": "dist",
     "buildResources": "static/icons"
   },
+  "afterPack": "./removeLocales.js",
   "extraFiles": [
     {
       "from": "src/preloads/preload.js",
       "to": "./resources/app/build/node_modules/electron-chrome-extensions/dist/preload.js"
+    },
+    {
+      "from": "web.koodoreader.com",
+      "to": "./resources/app/build/web.koodoreader.com"
     }
   ],
-  "files": ["build/**/*", "package.json", "static/**/*"],
+  "files": [
+    "build/**/*",
+    "package.json",
+    "static/**/*"
+  ],
   "publish": "github",
   "linux": {
     "category": "Network",
     "target": [
       {
         "target": "AppImage",
-        "arch": ["x64"]
+        "arch": [
+          "x64"
+        ]
       },
       {
         "target": "deb",
-        "arch": ["x64"]
+        "arch": [
+          "x64"
+        ]
       }
     ]
   },
   "win": {
     "target": [
       {
-        "target": "nsis-web",
-        "arch": ["x64", "ia32"]
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      },
+      {
+        "target": "nsis",
+        "arch": [
+          "ia32"
+        ]
       },
       {
         "target": "zip",
-        "arch": ["x64", "ia32"]
+        "arch": [
+          "x64",
+          "ia32"
+        ]
       }
-    ]
+    ],
+    "artifactName": "${productName}电脑版-${version}-${arch}.${ext}"
   },
   "mac": {
     "category": "public.app-category.navigation"

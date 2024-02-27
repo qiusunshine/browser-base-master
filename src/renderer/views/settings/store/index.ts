@@ -18,7 +18,8 @@ export type SettingsSection =
   | 'downloads'
   | 'system'
   | 'search-engines'
-  | 'extensions';
+  | 'extensions'
+  | 'about';
 
 export class Store {
   public autoFill = new AutoFillStore();
@@ -70,6 +71,9 @@ export class Store {
 
   @observable
   public settings: ISettings = { ...(window as any).settings };
+
+  @observable
+  public appVersion: string = (window as any)['xiu-app-version'];
 
   @observable
   public editedSearchEngine: ISearchEngine = null;

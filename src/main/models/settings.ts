@@ -220,6 +220,15 @@ export class Settings extends EventEmitter {
     contexts.forEach((e) => {
       e.webRequest.onBeforeSendHeaders({urls: ['<all_urls>']}, (details: Electron.OnBeforeSendHeadersListenerDetails, callback: any) => {
         const obj: { requestHeaders?: Record<string, string> } = {};
+        try {
+          const {object: settings} = Application.instance.settings;
+          if (settings.doNotTrack) {
+            details.requestHeaders['DNT'] = '1';
+            obj.requestHeaders = details.requestHeaders;
+          }
+        } catch (e) {
+          console.log(e);
+        }
         const ua = details.requestHeaders["User-Agent"];
         if (ua && ua.includes("Electron")) {
           details.requestHeaders["User-Agent"] = ChromeUserAgent;

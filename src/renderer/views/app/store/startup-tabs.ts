@@ -1,13 +1,13 @@
-import { makeObservable, observable } from 'mobx';
+import {makeObservable, observable} from 'mobx';
 
-import { Store } from '.';
+import {Store} from '.';
 import * as remote from '@electron/remote';
-import { prefixHttp, isURL } from '~/utils';
-import { Database } from '~/models/database';
-import { IStartupTab } from '~/interfaces/startup-tab';
-import { extname } from 'path';
-import { existsSync } from 'fs';
-import { ITab } from '../models';
+import {prefixHttp, isURL} from '~/utils';
+import {Database} from '~/models/database';
+import {IStartupTab} from '~/interfaces/startup-tab';
+import {extname} from 'path';
+import {existsSync} from 'fs';
+import {ITab} from '../models';
 import {getWebUIURL} from "~/common/webui";
 
 export class StartupTabsStore {
@@ -20,9 +20,30 @@ export class StartupTabsStore {
   private store: Store;
 
   public constructor(store: Store) {
-    makeObservable(this, { list: observable });
+    makeObservable(this, {list: observable});
 
     this.store = store;
+  }
+
+  private addTabs(options: chrome.tabs.CreateProperties[]) {
+    console.log("addTabs", document.readyState);
+
+    function ready(fn: any) {
+      if (document.readyState == 'complete') {
+        fn();
+      } else {
+        document.addEventListener('readystatechange', () => {
+          if (document.readyState == 'complete') {
+            fn();
+          }
+        });
+        // document.addEventListener('DOMContentLoaded', fn);
+      }
+    }
+
+    ready(() => {
+      this.store.tabs.addTabs(options);
+    });
   }
 
   public async load() {
@@ -33,15 +54,15 @@ export class StartupTabsStore {
     let tabsToLoad: IStartupTab[] = [];
 
     if (this.store.settings.object.startupBehavior.type === 'continue') {
-      tabsToLoad = await this.db.get({ windowId: this.store.windowId });
+      tabsToLoad = await this.db.get({windowId: this.store.windowId});
     } else if (this.store.windowId === 1) {
       if (this.store.settings.object.startupBehavior.type === 'urls') {
         tabsToLoad = await this.db.get({
-          $or: [{ isUserDefined: true }, { pinned: true }],
+          $or: [{isUserDefined: true}, {pinned: true}],
         } as any);
         this.list = tabsToLoad.filter((x) => x.isUserDefined);
       } else if (this.store.settings.object.startupBehavior.type === 'empty') {
-        tabsToLoad = await this.db.get({ pinned: true });
+        tabsToLoad = await this.db.get({pinned: true});
       }
     }
 
@@ -55,16 +76,16 @@ export class StartupTabsStore {
     if (tabsToLoad && tabsToLoad.length > 0) {
       this.clearStartupTabs(true, false);
 
-      this.store.tabs.addTabs(
+      this.addTabs(
         tabsToLoad
           .sort((x, y) =>
             x.pinned && y.pinned
               ? x.order - y.order
               : x.pinned
-              ? -1
-              : y.pinned
-              ? 1
-              : x.order - y.order,
+                ? -1
+                : y.pinned
+                  ? 1
+                  : x.order - y.order,
           )
           .map((tab, i) => ({
             url: prefixHttp(tab.url),
@@ -91,10 +112,10 @@ export class StartupTabsStore {
       const ext = extname(path);
 
       if (existsSync(path) && ext === '.html') {
-        this.store.tabs.addTabs([{ url: `file:///${path}`, active: true }]);
+        this.addTabs([{url: `file:///${path}`, active: true}]);
         needsNewTabPage = false;
       } else if (isURL(path)) {
-        this.store.tabs.addTabs([
+        this.addTabs([
           {
             url: prefixHttp(path),
             active: true,
@@ -105,7 +126,7 @@ export class StartupTabsStore {
     }
 
     if (needsNewTabPage) {
-      this.store.tabs.addTabs([{
+      this.addTabs([{
         url: getWebUIURL("newtab"),
         active: true
       }]);
@@ -113,12 +134,12 @@ export class StartupTabsStore {
   }
 
   public async addStartupTabItem(item: IStartupTab) {
-    if(!item.url || item.url.startsWith("chrome-ex") || item.url.endsWith(".crx") || item.url.endsWith(".zip")) {
+    if (!item.url || item.url.startsWith("chrome-ex") || item.url.endsWith(".crx") || item.url.endsWith(".zip")) {
       return;
     }
     const itemToReplace = this.list.find((x) => x.id === item.id);
     if (itemToReplace) {
-      this.db.update({ id: item.id }, item);
+      this.db.update({id: item.id}, item);
       this.list[this.list.indexOf(itemToReplace)] = {
         ...itemToReplace,
         ...item,
@@ -133,12 +154,12 @@ export class StartupTabsStore {
     const itemToDelete = this.list.find((x) => x.id === tabId);
     if (itemToDelete) {
       this.list = this.list.filter((x) => x.id !== tabId);
-      this.db.remove({ id: tabId });
+      this.db.remove({id: tabId});
     }
   }
 
   public async updateStartupTabItem(tab: ITab) {
-    if(!tab.url || tab.url.startsWith("chrome-ex") || tab.url.endsWith(".crx") || tab.url.endsWith(".zip")) {
+    if (!tab.url || tab.url.startsWith("chrome-ex") || tab.url.endsWith(".crx") || tab.url.endsWith(".zip")) {
       return;
     }
     this.addStartupTabItem({
@@ -157,13 +178,13 @@ export class StartupTabsStore {
       this.db.remove({}, true);
       this.list = [];
     } else if (!removePinned) {
-      this.db.remove({ pinned: false }, true);
+      this.db.remove({pinned: false}, true);
       this.list = this.list.filter((x) => x.pinned);
     } else if (!removeUserDefined) {
-      this.db.remove({ isUserDefined: false }, true);
+      this.db.remove({isUserDefined: false}, true);
       this.list = this.list.filter((x) => x.isUserDefined);
     } else {
-      this.db.remove({ isUserDefined: false, pinned: false }, true);
+      this.db.remove({isUserDefined: false, pinned: false}, true);
       this.list = this.list.filter((x) => x.isUserDefined || x.pinned);
     }
   }

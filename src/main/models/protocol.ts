@@ -55,6 +55,11 @@ export const registerProtocol = (session: Electron.Session) => {
             path: join(__dirname, `${parsed.hostname}.html`),
           });
         }
+        if (parsed.hostname === 'web.koodoreader.com') {
+          return callback({
+            path: join(__dirname, `${parsed.hostname}/${parsed.path}`),
+          });
+        }
 
         callback({ path: join(__dirname, parsed.path) });
       },

@@ -14,7 +14,7 @@ import {getWebUIURL} from "~/common/webui-main";
 
 export const isNightly = app.name === '嗅觉-nightly';
 
-app.allowRendererProcessReuse = true;
+//app.allowRendererProcessReuse = true;
 app.name = isNightly ? '嗅觉 Nightly' : '嗅觉';
 
 (process.env as any)['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true;

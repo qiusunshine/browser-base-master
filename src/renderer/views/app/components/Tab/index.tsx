@@ -40,6 +40,7 @@ const onVolumeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
 const onMouseDown = (tab: ITab) => (e: React.MouseEvent<HTMLDivElement>) => {
   const { pageX, button } = e;
 
+  console.log("onMouseDown", store.addressbarEditing);
   if (store.addressbarEditing) {
     store.inputRef.focus();
   }

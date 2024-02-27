@@ -22,7 +22,7 @@ import {
   ICON_DOWNLOAD,
   ICON_SHIELD,
   ICON_TRASH,
-  ICON_EDIT, ICON_EXTENSIONS,
+  ICON_EDIT, ICON_EXTENSIONS, ICON_ABOUT,
 } from '~/renderer/constants';
 import {
   ContextMenuItem,
@@ -36,6 +36,7 @@ import {
 import { Textfield } from '~/renderer/components/Textfield';
 import { WebUIStyle } from '~/renderer/mixins/default-styles';
 import {Extensions} from "~/renderer/views/settings/components/Extensions";
+import {About} from "~/renderer/views/settings/components/About";
 
 export const NormalButton = ({
   children,
@@ -263,6 +264,9 @@ export default observer(() => {
           <MenuItem icon={ICON_SHIELD} section="privacy">
             拦截保护
           </MenuItem>
+          <MenuItem icon={ICON_ABOUT} section="about">
+            关于
+          </MenuItem>
           {/* <MenuItem section="permissions">Site permissions</MenuItem> */}
 
           {/* <MenuItem section="language">Languages</MenuItem> */}
@@ -281,6 +285,7 @@ export default observer(() => {
             {selectedSection === 'privacy' && <Privacy />}
             {selectedSection === 'downloads' && <Downloads />}
             {selectedSection === 'extensions' && <Extensions />}
+            {selectedSection === 'about' && <About />}
           </LeftContent>
         </Content>
       </Container>

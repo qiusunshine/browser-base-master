@@ -12,10 +12,12 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 /* eslint-enable */
 
 const INCLUDE = resolve(__dirname, 'src');
+const packageInfo = require('./package.json');
 
 const BUILD_FLAGS = {
   ENABLE_EXTENSIONS: true,
   ENABLE_AUTOFILL: true,
+  VERSION_CODE: packageInfo.version
 };
 
 process.env = {
