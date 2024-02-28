@@ -25,10 +25,6 @@
     {
       "from": "src/preloads/preload.js",
       "to": "./resources/app/build/node_modules/electron-chrome-extensions/dist/preload.js"
-    },
-    {
-      "from": "web.koodoreader.com",
-      "to": "./resources/app/build/web.koodoreader.com"
     }
   ],
   "files": [

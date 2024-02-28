@@ -92,7 +92,7 @@ const goToURL = (url: string) => () => {
 
 const onUpdateClick = () => {
   //todo 暂时写死
-  addNewTab("https://www.123pan.com/s/fajA-jgyQh.html");
+  //addNewTab("https://www.123pan.com/s/fajA-jgyQh.html");
 };
 
 export const QuickMenu = observer(() => {
@@ -148,14 +148,14 @@ export const QuickMenu = observer(() => {
             <Icon icon={ICON_EXTENSIONS} />
             <MenuItemTitle>扩展程序</MenuItemTitle>
           </MenuItem>
-          <MenuItem
+          {/* <MenuItem
             onClick={goToURL(
               getWebUIURL('web.koodoreader.com/index.html'),
             )}
           >
             <Icon icon={ICON_EXTENSIONS} />
             <MenuItemTitle>电子书阅读器</MenuItemTitle>
-          </MenuItem>
+          </MenuItem> */}
           <Line />
           <MenuItem onClick={onFindInPageClick}>
             <Icon icon={ICON_FIND} />
